@@ -1,0 +1,10 @@
+# Line format <SHOW_ALIAS>=<SHOW_DIRECTORY>
+# No need to escape or quote characters. Separate the alias from the show
+# directory with an equals sign. File should be UTF8 encoded without BOM.
+# For example show alias "CSI NY" would map to show directory "CSI New York"
+#CSI NY=CSI New York
+
+Its Always Sunny In Philadelphia=It's Always Sunny In Philadelphia
+CSI NY=CSI New York
+The Office=The Office (US)
+The Office US=The Office (US)
