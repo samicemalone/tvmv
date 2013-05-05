@@ -35,21 +35,23 @@ package tvmv.util;
 public class StringUtil {
     
     /**
-     * Converts a string into display case. e.g. a string => A String,
-     * SOME STRING => Some String, HyPhen-sTring => Hyphen-String
-     * @param s String to be converted to display case
-     * @return String s in display case
+     * Converts a string into title case. e.g. this string => This String
+     * @param s String to be converted to title case
+     * @return String s in title case
      */
-    public static String toDisplayCase(String s) {
-        final String CASE_DELIMITERS = " '-/"; // these cause the character following to be capitalized
-        StringBuilder sb = new StringBuilder();
-        boolean capNext = true;
+    public static String toTitleCase(String s) {
+        StringBuilder titleCase = new StringBuilder();
+        boolean nextTitleCase = true;
         for (char c : s.toCharArray()) {
-            c = capNext ? Character.toUpperCase(c) : Character.toLowerCase(c);
-            sb.append(c);
-            capNext = CASE_DELIMITERS.indexOf(c) >= 0;
+            if (Character.isSpaceChar(c)) {
+                nextTitleCase = true;
+            } else if (nextTitleCase) {
+                c = Character.toTitleCase(c);
+                nextTitleCase = false;
+            }
+            titleCase.append(c);
         }
-        return sb.toString();
+        return titleCase.toString();
     }
     
 }

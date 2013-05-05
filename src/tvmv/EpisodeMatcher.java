@@ -73,7 +73,7 @@ public class EpisodeMatcher {
             Matcher m = Pattern.compile(r, Pattern.CASE_INSENSITIVE).matcher(new File(ep).getName());
             if (m.find()) {
                 e = new Episode();
-                e.setShow(StringUtil.toDisplayCase(m.group(1).replaceAll("\\.|_", " ").trim()));
+                e.setShow(StringUtil.toTitleCase(m.group(1).replaceAll("\\.|_", " ").trim()));
                 e.setSeasonNo(Integer.valueOf(m.group(2)));
                 e.setEpisodeNo(Integer.valueOf(m.group(3)));
                 e.setShowDirectory(findShowDirectory(e.getShow()));
