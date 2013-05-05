@@ -116,6 +116,7 @@ public class Args {
             if(file.startsWith("/cygdrive/")) {
                 String winPath = new StringBuilder().append(file.charAt(10)).append(":\\").append(file.substring(12)).toString();
                 args.inputFiles.set(i, winPath);
+                file = winPath;
             }
             File f = new File(file);
             if(!f.exists()) {
