@@ -8,10 +8,12 @@ This file describes the installation of "tvmv" on your machine.
  Requirements
 ===============================================================================
 
-This application was written in Java. To run the application, a Java virtual
-machine has to be installed. This can be provided via Oracle's Java Runtime 
-Environment (JRE). The minimum JRE version that this application supports is
-1.6. See: http://java.com/en/download/index.jsp.
+* This application was written in Java. To run the application, a Java virtual
+   machine has to be installed. This can be provided via Oracle's Java Runtime 
+   Environment (JRE). The minimum JRE version that this application supports is
+   1.6. See: http://java.com/en/download/index.jsp
+
+ * Apache Ant 1.8.3. is required to build from source.
 
 ===============================================================================
  External Libraries
@@ -21,6 +23,14 @@ This application uses the Apache Commons IO library (lib/commons-io-2.4.jar).
 The sources are available from 
 http://commons.apache.org/proper/commons-io/download_io.cgi.
 
+===============================================================================
+ Build 
+===============================================================================
+
+To build the application, run the following command:
+
+    ant jar
+		
 ===============================================================================
  Configuration
 ===============================================================================
@@ -41,7 +51,7 @@ in the repository shows an example of how to use this file. There is also more
 information about configuration files in the FILES section in README.txt
 
 ===============================================================================
- 3. Running the program
+ Running the Program
 ===============================================================================
 
 Assuming the java executable is in your $PATH variable, you run the program as
