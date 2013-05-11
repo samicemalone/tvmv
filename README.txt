@@ -39,19 +39,18 @@ OPTIONS
       This flag makes tvmv remove the existing episode file (under the season
       directory in one the TV source folders) and moves the input episode file
       to the season directory.
-			
+      
 Episode IO
-   tvmv doesnt perform a direct "move" operation on the input episode files.
-	 Instead the input episode files are copied to the season directory as a
-	 temporary file and then renamed to the same file name as the input file.
-	 If this copy and rename was successful, only then will the original input
-	 episode file be deleted.
-	 
-	 When replacing an episode, the same steps are applied as above except that
-	 the existing episode will only be deleted if the input file was successfully
-	 copied to the season directory. If the copy wasn't successful the temp file
-	 will be deleted and the original input file will remain unchanged.
-	 
+   tvmv tries perform a direct "move" operation on the input episode files.
+   If the episode file and its destination are not on the same filesystem, a
+   copy and delete will be used instead.
+   
+   When replacing an episode, the input episode file will be moved to the
+   season directory with a temporary file name. The existing episode will only
+   be deleted if the input file was successfully moved to the season directory
+   If the move wasn't successful, the temporary file will be moved back to its
+   original location.
+   
 FILES
    The TV folder sources should use the following folder structure:
    

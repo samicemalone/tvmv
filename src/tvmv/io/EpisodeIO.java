@@ -61,19 +61,15 @@ public class EpisodeIO {
      * the same file name.
      * @param inputFile Path of the input episode file
      * @param ep Episode representing the input file
+     * @throws IOException if the destination file already exists
      * @throws IOException if an IO error occurs during moving
      */
     public static void moveEpisode(String inputFile, Episode ep) throws IOException {
         File toMove = new File(inputFile);
         File destFile = new File(ep.getSeasonDirectory(), toMove.getName());
         System.out.print("Moving " + toMove.getName() + "...");
-        File tmpFile = FileUtil.getTempFile(ep.getSeasonDirectory());
-        FileUtils.copyFile(toMove, tmpFile);
-        FileUtils.moveFile(tmpFile, destFile);
+        FileUtils.moveFile(toMove, destFile);
         System.out.println("done");
-        if(!toMove.delete()) {
-            System.err.println("warning: copy was successful but could not delete original input file " + toMove.getAbsolutePath());
-        }
     }
     
     /**
@@ -110,19 +106,13 @@ public class EpisodeIO {
         System.out.println("Replacing " + toDelete.getName());
         System.out.print(" with " + toMove.getName() + "...");
         
-        FileUtils.copyFile(toMove, tmpFile);
+        FileUtils.moveFile(toMove, tmpFile);
         if(!toDelete.delete()) {
-            String message = "Could not delete the existing episode at " + toDelete.getAbsolutePath();
-            if(tmpFile.exists() && !tmpFile.delete()) {
-                throw new IOException(message + " and could not remove the temporary file " + tmpFile.getAbsolutePath());
-            }
-            throw new IOException(message);
+            FileUtils.moveFile(tmpFile, toMove); // roll back
+            throw new IOException("Could not delete the existing episode at " + toDelete.getAbsolutePath());
         }
         FileUtils.moveFile(tmpFile, destFile);
         System.out.println("done");
-        if(!toMove.delete()) {
-            System.err.println("warning: copy was successful but could not delete original input file " + toMove.getAbsolutePath());
-        }
     }
     
 }
