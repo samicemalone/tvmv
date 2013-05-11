@@ -38,20 +38,27 @@ import java.util.Random;
 public class FileUtil {
     
     /**
-     * Returns a temporary File with a random filename in the directory given
-     * by tmpDir. The temporary file will not exist or be created.
-     * @param tmpDir Directory to store temp file
-     * @return Non existing temporary file
+     * Returns a temporary File with the file name containing the prefix
+     * given and a random string appended to the prefix, in the directory
+     * given by tmpDir. The temporary file will not exist or be created.
+     * @param tmpDir Directory to store temporary file
+     * @param prefix Prefix for the temporary file. If null, no prefix
+     * is used (e.g. random file name).
+     * @return Non existing temporary file in tmpDir
      */
-    public static File getTempFile(File tmpDir) {
+    public static File getTempFile(File tmpDir, String prefix) {
         final String alphabet = "0123456789abcdefghijklmnpqrstuvwxyz";
         final String extension = ".tmp";
-        final int tmpFileNameLength = 20;
+        final int tmpFileNameLength = 12;
         Random r = new Random();
         StringBuilder sb;
         File tmpFile;
+        if(prefix == null) {
+            prefix = "";
+        }
         do {
-            sb = new StringBuilder(tmpFileNameLength + extension.length() + 1);
+            sb = new StringBuilder(prefix.length() + tmpFileNameLength + extension.length() + 1);
+            sb.append(prefix);
             for(int i = 0; i < tmpFileNameLength; i++) {
                 sb.append(alphabet.charAt(r.nextInt(alphabet.length())));
             }

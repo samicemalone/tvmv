@@ -102,7 +102,7 @@ public class EpisodeIO {
         }
         File toMove = new File(inputFile);
         File destFile = new File(ep.getSeasonDirectory(), toMove.getName());
-        File tmpFile = FileUtil.getTempFile(ep.getSeasonDirectory());
+        File tmpFile = FileUtil.getTempFile(ep.getSeasonDirectory(), toMove.getName());
         System.out.println("Replacing " + toDelete.getName());
         System.out.print(" with " + toMove.getName() + "...");
         
