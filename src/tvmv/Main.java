@@ -53,10 +53,16 @@ public class Main {
             arguments = Args.validate(arguments);
             EpisodeMatcher matcher = new EpisodeMatcher(SourceReader.read(), AliasReader.read());
             List<Episode> episodeList = matcher.matchEpisodes(arguments.getInputFiles());
-            if(arguments.isReplaceSet()) {
-                EpisodeIO.replaceEpisodes(matcher, arguments.getInputFiles(), episodeList);
-            } else {
-                EpisodeIO.moveEpisodes(arguments.getInputFiles(), episodeList);
+            for(int i = 0; i < arguments.getInputFiles().size(); i++) {
+                if(arguments.isReplaceSet()) {
+                    EpisodeIO.replaceEpisode(matcher, arguments.getInputFiles().get(i), episodeList.get(i), !arguments.isCopySet());
+                } else {
+                    if(arguments.isCopySet()) {
+                        EpisodeIO.copyEpisode(arguments.getInputFiles().get(i), episodeList.get(i));
+                    } else {
+                        EpisodeIO.moveEpisode(arguments.getInputFiles().get(i), episodeList.get(i));
+                    }
+                }
             }
         } catch(Exception e) {
             System.err.println(e.getMessage());
@@ -71,6 +77,7 @@ public class Main {
         System.out.println("episode number. Each FILE will then be moved the matching TV source folder as");
         System.out.println("defined in sources.conf");
         System.out.println();
+        System.out.println("   -c, --copy       Copy the input FILEs instead of moving them");
         System.out.println("   -h, --help       Prints this message");
         System.out.println("   -r, --replace    Replaces existing episodes");
         System.out.println();

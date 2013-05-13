@@ -31,7 +31,6 @@ package tvmv.io;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.List;
 import org.apache.commons.io.FileUtils;
 import tvmv.EpisodeMatcher;
 import tvmv.model.Episode;
@@ -41,19 +40,22 @@ import tvmv.util.FileUtil;
  *
  * @author Sam Malone
  */
-public class EpisodeIO {
-    
+public class EpisodeIO {  
+     
     /**
-     * The input episode files will be moved to their season directory with
+     * The input episode file will be copied to its season directory with
      * the same file name.
-     * @param inputFiles List of input episode file paths
-     * @param episodeList List of episodes representing the input files
-     * @throws IOException if an IO error occurs during moving
+     * @param inputFile Path of the input episode file
+     * @param ep Episode representing the input file
+     * @throws IOException if the destination file already exists
+     * @throws IOException if an IO error occurs during copying
      */
-    public static void moveEpisodes(List<String> inputFiles, List<Episode> episodeList) throws IOException {
-        for(int i = 0; i < inputFiles.size(); i++) {
-            moveEpisode(inputFiles.get(i), episodeList.get(i));
-        }
+    public static void copyEpisode(String inputFile, Episode ep) throws IOException {
+        File toCopy = new File(inputFile);
+        File destFile = new File(ep.getSeasonDirectory(), toCopy.getName());
+        System.out.print("Copying " + toCopy.getName() + "...");
+        FileUtils.copyFile(toCopy, destFile);
+        System.out.println("done");
     }
  
     /**
@@ -73,29 +75,20 @@ public class EpisodeIO {
     }
     
     /**
-     * 
-     * @param matcher Episode Matcher for matching the existing episode
-     * @param inputFiles List of paths of the input episode files
-     * @param episodeList List of episodes representing the input files
-     * @throws IOException if an IO error occurs during replacing an episode
-     */
-    public static void replaceEpisodes(EpisodeMatcher matcher, List<String> inputFiles, List<Episode> episodeList) throws IOException {
-        for(int i = 0; i < inputFiles.size(); i++) {
-            replaceEpisode(matcher, inputFiles.get(i), episodeList.get(i));
-        }
-    }
-    
-    /**
      * Replaces an existing episode with the input episode file.
      * The input episode file will be moved to its season directory with
-     * the same file name. The existing episode will only be removed if
-     * moving the input file succeeds.
+     * the same file name if moveOriginal is set. If moveOriginal is false,
+     * the input episode file will be copied instead of moved.
+     * The existing episode will only be removed if moving/copying the input
+     * file succeeds.
      * @param matcher Episode Matcher for matching the existing episode
      * @param inputFile Path of the input episode file
      * @param ep Episode representing the input file
+     * @param moveOriginal if true, the input file will be moved. if false,
+     * the input file will be copied.
      * @throws IOException if an IO error occurs during replacing
      */
-    public static void replaceEpisode(EpisodeMatcher matcher, String inputFile, Episode ep) throws IOException {
+    public static void replaceEpisode(EpisodeMatcher matcher, String inputFile, Episode ep, boolean moveOriginal) throws IOException {
         File toDelete = matcher.findExistingEpisodeFile(ep);
         if(toDelete == null) {
             throw new FileNotFoundException("Unable to find existing file for " + ep);
@@ -105,10 +98,17 @@ public class EpisodeIO {
         File tmpFile = FileUtil.getTempFile(ep.getSeasonDirectory(), toMove.getName());
         System.out.println("Replacing " + toDelete.getName());
         System.out.print(" with " + toMove.getName() + "...");
-        
-        FileUtils.moveFile(toMove, tmpFile);
+        if(moveOriginal) {
+            FileUtils.moveFile(toMove, tmpFile);
+        } else {
+            FileUtils.copyFile(toMove, tmpFile);
+        }
         if(!toDelete.delete()) {
-            FileUtils.moveFile(tmpFile, toMove); // roll back
+            if(moveOriginal) {
+                FileUtils.moveFile(tmpFile, toMove); // roll back
+            } else {
+                tmpFile.delete(); // delete tmp copy
+            }
             throw new IOException("Could not delete the existing episode at " + toDelete.getAbsolutePath());
         }
         FileUtils.moveFile(tmpFile, destFile);

@@ -42,6 +42,7 @@ import tvmv.exception.UnsupportedFileException;
 public class Args {
     
     private boolean isReplace = false;
+    private boolean isCopy = false;
     private List<String> inputFiles;
 
     private Args() {
@@ -58,6 +59,14 @@ public class Args {
      */
     public boolean isReplaceSet() {
         return isReplace;
+    }
+
+    /**
+     * Checks if the Replace flag is set
+     * @return true if set, false otherwise
+     */
+    public boolean isCopySet() {
+        return isCopy;
     }
 
     /**
@@ -89,6 +98,10 @@ public class Args {
             }
             if (arg.equals("-r") || arg.equals("--replace")) {
                 returnArgs.isReplace = true;
+                continue;
+            }
+            if (arg.equals("-c") || arg.equals("--copy")) {
+                returnArgs.isCopy = true;
                 continue;
             }
             returnArgs.addInputFile(arg);
