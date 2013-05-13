@@ -71,7 +71,7 @@ public class Main {
     }
     
     public static void printHelp() {
-        System.out.println("Usage:   tvmv FILE... [-hr]");
+        System.out.println("Usage:   tvmv FILE... [-chr]");
         System.out.println();
         System.out.println("Parses each episode FILE to determine the TV show name, season number and");
         System.out.println("episode number. Each FILE will then be moved the matching TV source folder as");

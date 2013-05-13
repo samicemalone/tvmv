@@ -4,7 +4,7 @@ NAME
           the input files.
 
 SYNOPSIS
-   tvmv FILE... [-hr]
+   tvmv FILE... [-chr]
 
 DESCRIPTION
    "tvmv" allows you to move/copy TV episode files into the correct TV folder
