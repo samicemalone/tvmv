@@ -46,13 +46,13 @@ import tvmv.util.StringUtil;
  */
 public class EpisodeMatcher {
     
-    private AliasMap aliasMap;
-    private TVSourceList sourceList;
+    private final AliasMap aliasMap;
+    private final TVSourceList sourceList;
     
-    private static String[] regexList = new String[] {
+    private static final String[] regexList = new String[] {
         "(.*?)[ -._]+s([0-9]+)[ -._]*e([0-9]+).*?",
         "(.*?)[ -._]+([0-9]+)x([0-9]+).*?",
-        "(.*?)([0-9]+)([0-9][0-9]).*?"
+        "(.*?)[ -._]+([0-9]+)([0-9][0-9]).*?"
     };
     
     public EpisodeMatcher(TVSourceList sourceList, AliasMap aliasMap) {
