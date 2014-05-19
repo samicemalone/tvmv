@@ -127,7 +127,7 @@ public class EpisodeIO {
     /**
      * Create the destination directories for the source episodes given.
      * @param sourceEpisodes
-     * @return set of the destination directories
+     * @return set of the destination directories for the episodes in sourceEpisodes
      * @throws IOException if unable to create the new episodes directory path
      * @throws SeasonsPathNotFoundException if unable to find the seasons path
      */
