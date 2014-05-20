@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
+import org.fusesource.jansi.Ansi;
+import org.fusesource.jansi.AnsiConsole;
 import uk.co.samicemalone.libtv.exception.MatchException;
 import uk.co.samicemalone.libtv.matcher.path.AliasedTVLibrary;
 import uk.co.samicemalone.libtv.model.AliasMap;
@@ -80,7 +82,12 @@ public class Main {
                 }
             }
         } catch(IOException | ParseException | IllegalStateException | OSNotSupportedException | MatchException e) {
-            System.err.println(e.getMessage());
+            AnsiConsole.err.println(Ansi.ansi().render(e.getMessage()));
+            Throwable t = e.getCause();
+            if(t != null) {
+                AnsiConsole.err.print(Ansi.ansi().render(" @|yellow Cause|@: "));
+                System.err.println(t.getMessage());
+            }
             System.exit(1);
         }
     }

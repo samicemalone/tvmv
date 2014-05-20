@@ -116,6 +116,8 @@ public abstract class IOOperation {
     
     private void displayIOProgress(IOProgress p) throws IOException {
         if(p.wasError()) {
+            Display.onIOProgress(p);
+            Display.onPostIO();
             throw p.getError();
         }
         Display.onIOProgress(p);
@@ -193,29 +195,34 @@ public abstract class IOOperation {
 
         @Override
         public void run() {
+            long totalBytesWritten = 0;
+            long size = 0;
             try (InputStream bis = new BufferedInputStream(Files.newInputStream(source));
                 OutputStream bos = new BufferedOutputStream(Files.newOutputStream(destination))) {
                 byte[] buffer = new byte[8192];
                 int bytesRead;
-                long size = Files.size(source);
+                size = Files.size(source);
                 long bytesPerChar = IOProgress.getBytesPerChar(size);
                 long nextCharBytes = bytesPerChar;
-                long totalBytesWritten = 0;
                 progress.offer(new IOProgress(0, size));
                 while((bytesRead = bis.read(buffer)) != -1) {
                     bos.write(buffer, 0, bytesRead);
                     totalBytesWritten += bytesRead;
-                    if(totalBytesWritten >= nextCharBytes) {
+                    if(totalBytesWritten >= nextCharBytes && totalBytesWritten != size) {
                         progress.offer(new IOProgress(totalBytesWritten, size));
                         nextCharBytes += bytesPerChar;
                     }
                 }
                 if(getType() == Type.MOVE) {
-                    Files.delete(source);
+                    try {
+                        Files.delete(source);
+                    } catch (IOException ex) {
+                        throw new IOException("@|yellow Notice|@: The file was copied successfully but the source file could not be deleted", ex);
+                    }
                 }
                 progress.offer(new IOProgress(size, size));
             } catch (IOException ex) {
-                progress.offer(new IOProgress(ex));
+                progress.offer(new IOProgress(totalBytesWritten, size, ex));
             }
         }
         

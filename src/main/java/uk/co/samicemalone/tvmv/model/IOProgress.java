@@ -48,16 +48,18 @@ public class IOProgress {
     
     private final IOException exception;
 
-    public IOProgress(long bytesWritten, long size) {
+    public IOProgress(long bytesWritten, long size, IOException ioe) {
         this.bytesWritten = bytesWritten;
         this.size = size;
-        this.exception = null;
+        this.exception = ioe;
+    }
+
+    public IOProgress(long bytesWritten, long size) {
+        this(bytesWritten, size, null);
     }
 
     public IOProgress(IOException ioe) {
-        this.bytesWritten = 0;
-        this.size = 0;
-        this.exception = ioe;
+        this(0, 0, ioe);
     }
 
     public long getSize() {

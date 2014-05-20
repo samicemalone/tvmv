@@ -31,6 +31,8 @@ package uk.co.samicemalone.tvmv;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import org.apache.commons.lang3.StringUtils;
+import org.fusesource.jansi.Ansi;
+import org.fusesource.jansi.AnsiConsole;
 import uk.co.samicemalone.tvmv.io.IOOperation;
 import uk.co.samicemalone.tvmv.model.IOProgress;
 
@@ -90,11 +92,11 @@ public class Display {
         int chars = p.hasCompleted() ? PROGRESS_WIDTH : p.getRatio().multiply(new BigDecimal(PROGRESS_WIDTH)).intValue();
         int spaces = PROGRESS_WIDTH - chars;
         StringBuilder format = new StringBuilder(WIDTH);
-        format.append('[').append(StringUtils.repeat('=', chars));
+        format.append("[@|green ").append(StringUtils.repeat('=', chars)).append("|@");
         format.append(StringUtils.repeat(' ', spaces)).append("] ");
         format.append(StringUtils.leftPad(percent, 3)).append('%');
         System.out.print('\r');
-        System.out.print(format.toString());
+        AnsiConsole.out.print(Ansi.ansi(WIDTH).render(format.toString()));
     }
     
 }
