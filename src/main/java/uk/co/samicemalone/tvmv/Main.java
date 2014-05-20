@@ -81,7 +81,6 @@ public class Main {
             }
         } catch(IOException | ParseException | IllegalStateException | OSNotSupportedException | MatchException e) {
             System.err.println(e.getMessage());
-            e.printStackTrace();
             System.exit(1);
         }
     }

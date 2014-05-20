@@ -28,10 +28,21 @@
  */
 package uk.co.samicemalone.tvmv.io;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import uk.co.samicemalone.tvmv.Display;
+import uk.co.samicemalone.tvmv.model.IOProgress;
 
 /**
  *
@@ -51,6 +62,8 @@ public abstract class IOOperation {
     protected Path destination;
     
     public abstract IOOperation start() throws IOException;
+    
+    public abstract IOOperation startProgress() throws IOException;
     
     public abstract void rollbackOrThrow() throws IOException;
     
@@ -85,10 +98,39 @@ public abstract class IOOperation {
         return source;
     }
     
+    protected void doIO(Path source, Path destination) throws IOException {
+        ExecutorService es = Executors.newFixedThreadPool(1);
+        BlockingQueue<IOProgress> bq = new LinkedBlockingQueue<>(100);
+        es.execute(new ThreadIOProgress(source, destination, bq));
+        try {
+            IOProgress p;
+            while(!(p = bq.take()).hasCompleted()) {
+                displayIOProgress(p);
+            }
+            displayIOProgress(p);
+        } catch (InterruptedException ex) {
+            throw new IOException(ex);
+        }
+        es.shutdown();
+    }
+    
+    private void displayIOProgress(IOProgress p) throws IOException {
+        if(p.wasError()) {
+            throw p.getError();
+        }
+        Display.onIOProgress(p);
+    }
+    
     public static class Move extends IOOperation {        
         @Override
         public IOOperation start() throws IOException {
             Files.move(source, destination, StandardCopyOption.REPLACE_EXISTING);
+            return this;
+        }
+        
+        @Override
+        public IOOperation startProgress() throws IOException {
+            doIO(source, destination);
             return this;
         }
 
@@ -116,6 +158,12 @@ public abstract class IOOperation {
         }
         
         @Override
+        public IOOperation startProgress() throws IOException {
+            doIO(source, destination);
+            return this;
+        }
+        
+        @Override
         public void rollbackOrThrow() throws IOException {
             Files.delete(destination);
         }
@@ -129,6 +177,48 @@ public abstract class IOOperation {
         public IOOperation newInstance() {
             return new Copy();
         }
+    }
+    
+    private class ThreadIOProgress implements Runnable {
+        
+        private final Path source;
+        private final Path destination;
+        private final BlockingQueue<IOProgress> progress;
+
+        public ThreadIOProgress(Path source, Path destination, BlockingQueue<IOProgress> progress) {
+            this.source = source;
+            this.destination = destination;
+            this.progress = progress;
+        }
+
+        @Override
+        public void run() {
+            try (InputStream bis = new BufferedInputStream(Files.newInputStream(source));
+                OutputStream bos = new BufferedOutputStream(Files.newOutputStream(destination))) {
+                byte[] buffer = new byte[8192];
+                int bytesRead;
+                long size = Files.size(source);
+                long bytesPerChar = IOProgress.getBytesPerChar(size);
+                long nextCharBytes = bytesPerChar;
+                long totalBytesWritten = 0;
+                progress.offer(new IOProgress(0, size));
+                while((bytesRead = bis.read(buffer)) != -1) {
+                    bos.write(buffer, 0, bytesRead);
+                    totalBytesWritten += bytesRead;
+                    if(totalBytesWritten >= nextCharBytes) {
+                        progress.offer(new IOProgress(totalBytesWritten, size));
+                        nextCharBytes += bytesPerChar;
+                    }
+                }
+                if(getType() == Type.MOVE) {
+                    Files.delete(source);
+                }
+                progress.offer(new IOProgress(size, size));
+            } catch (IOException ex) {
+                progress.offer(new IOProgress(ex));
+            }
+        }
+        
     }
     
 }

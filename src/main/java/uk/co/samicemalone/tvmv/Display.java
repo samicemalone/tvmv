@@ -28,14 +28,20 @@
  */
 package uk.co.samicemalone.tvmv;
 
+import java.math.BigDecimal;
 import java.nio.file.Path;
+import org.apache.commons.lang3.StringUtils;
 import uk.co.samicemalone.tvmv.io.IOOperation;
+import uk.co.samicemalone.tvmv.model.IOProgress;
 
 /**
  *
  * @author Sam Malone
  */
 public class Display {
+    
+    public static final int WIDTH = 80;
+    public static final int PROGRESS_WIDTH = 73; // WIDTH - "[] ###%" length
     
     private static String getIODescription(IOOperation.Type type) {
         return type == IOOperation.Type.COPY ? "Copying" : "Moving";
@@ -60,7 +66,7 @@ public class Display {
     }
     
     public static void onPreIOReplace(IOOperation iop) {
-        System.out.format("  %s...", iop.getSource().getFileName());
+        System.out.format("  %s...\n", iop.getSource().getFileName());
     }
     
     public static void onPostIOReplace() {
@@ -68,15 +74,27 @@ public class Display {
     }
     
     public static void onPreIO(IOOperation iop) {
-        System.out.format("%s %s...", getIODescription(iop.getType()), iop.getSource().getFileName());
+        System.out.format("%s %s...\n", getIODescription(iop.getType()), iop.getSource().getFileName());
     }
     
     public static void onPostIO() {
-        System.out.println("done");
+        System.out.println();
     }
     
     public static void onSkipNotMatched(Path skippedPath) {
         System.out.println("Skipping: " + skippedPath);
+    }
+    
+    public static void onIOProgress(IOProgress p) {
+        String percent = p.hasCompleted() ? "100" : String.valueOf(p.getPercent());
+        int chars = p.hasCompleted() ? PROGRESS_WIDTH : p.getRatio().multiply(new BigDecimal(PROGRESS_WIDTH)).intValue();
+        int spaces = PROGRESS_WIDTH - chars;
+        StringBuilder format = new StringBuilder(WIDTH);
+        format.append('[').append(StringUtils.repeat('=', chars));
+        format.append(StringUtils.repeat(' ', spaces)).append("] ");
+        format.append(StringUtils.leftPad(percent, 3)).append('%');
+        System.out.print('\r');
+        System.out.print(format.toString());
     }
     
 }

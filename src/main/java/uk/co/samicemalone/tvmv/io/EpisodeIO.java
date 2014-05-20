@@ -70,7 +70,7 @@ public class EpisodeIO {
         Path destPath = destinationDir.resolve(sourceEpisode.getEpisodeFile().getName());
         iop.setOperands(sourceEpisode.getEpisodeFile().toPath(), destPath);
         Display.onPreIO(iop);
-        iop.start();
+        iop.startProgress();
         Display.onPostIO();
     }
     
@@ -106,7 +106,7 @@ public class EpisodeIO {
                 Path destPath = destDir.resolve(sourceMatch.getEpisodeFile().getName());
                 io = iop.newInstance().setOperands(sourceMatch.getEpisodeFile().toPath(), destPath);
                 Display.onPreIOReplace(io);
-                tmpTransactions.push(io.start());
+                tmpTransactions.push(io.startProgress());
                 Display.onPostIOReplace();
             }
         } catch (IOException e) {
