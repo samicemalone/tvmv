@@ -29,6 +29,7 @@
 package uk.co.samicemalone.tvmv.io;
 
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -68,6 +69,9 @@ public class EpisodeIO {
      */
     public void start(IOOperation iop, EpisodeMatch sourceEpisode, Path destinationDir) throws IOException {
         Path destPath = destinationDir.resolve(sourceEpisode.getEpisodeFile().getName());
+        if(Files.exists(destPath)) {
+            throw new FileAlreadyExistsException(sourceEpisode.getEpisodeFile().getAbsolutePath(), destPath.toString(), "Destination file already exists.");
+        }
         iop.setOperands(sourceEpisode.getEpisodeFile().toPath(), destPath);
         Display.onPreIO(iop);
         iop.startProgress();
