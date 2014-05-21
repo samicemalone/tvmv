@@ -37,11 +37,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import uk.co.samicemalone.tvmv.Display;
+import uk.co.samicemalone.tvmv.exception.FileStillExistsException;
 import uk.co.samicemalone.tvmv.model.IOProgress;
 
 /**
@@ -126,7 +126,11 @@ public abstract class IOOperation {
     public static class Move extends IOOperation {        
         @Override
         public IOOperation start() throws IOException {
-            Files.move(source, destination, StandardCopyOption.REPLACE_EXISTING);
+            try {
+                Files.move(source, destination, StandardCopyOption.REPLACE_EXISTING);
+            } catch(IOException ex) {
+                throw new IOException("@|yellow Notice|@: Unable to move the file.", ex);
+            }
             return this;
         }
         
@@ -217,7 +221,7 @@ public abstract class IOOperation {
                     try {
                         Files.delete(source);
                     } catch (IOException ex) {
-                        throw new IOException("@|yellow Notice|@: The file was copied successfully but the source file could not be deleted", ex);
+                        throw new FileStillExistsException("@|yellow Notice|@: The source file could not be deleted so the move has been rolled back", ex);
                     }
                 }
                 progress.offer(new IOProgress(size, size));

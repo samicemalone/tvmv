@@ -98,5 +98,9 @@ public class Display {
         System.out.print('\r');
         AnsiConsole.out.print(Ansi.ansi(WIDTH).render(format.toString()));
     }
+
+    public static void onIORollback(IOOperation io) {
+        System.out.println("Rolling Back: " + io.getDestination().getFileName());
+    }
     
 }

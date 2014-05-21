@@ -41,6 +41,7 @@ import uk.co.samicemalone.libtv.exception.SeasonsPathNotFoundException;
 import uk.co.samicemalone.libtv.matcher.path.AliasedTVLibrary;
 import uk.co.samicemalone.libtv.model.EpisodeMatch;
 import uk.co.samicemalone.tvmv.Display;
+import uk.co.samicemalone.tvmv.exception.FileStillExistsException;
 import uk.co.samicemalone.tvmv.model.DequeStack;
 import uk.co.samicemalone.tvmv.model.ReplacementMapping;
 import uk.co.samicemalone.tvmv.model.Stack;
@@ -94,7 +95,7 @@ public class EpisodeIO {
         Path destDir = getEpisodesPath(mapping.getSource().iterator().next());
         List<Path> tmpDestinations = new ArrayList<>(mapping.getDestination().size());
         Stack<IOOperation> tmpTransactions = new DequeStack<>(mapping.getDestination().size());
-        IOOperation io;
+        IOOperation io = null;
         try {
             Display.onPreRemoveOld(mapping.getDestination().size());
             for(EpisodeMatch destMatch : mapping.getDestination()) {
@@ -113,18 +114,42 @@ public class EpisodeIO {
                 tmpTransactions.push(io.startProgress());
                 Display.onPostIOReplace();
             }
-        } catch (IOException e) {
-            while((io = tmpTransactions.pop()) != null) {
-                io.rollback();
+        } catch (FileStillExistsException e) {
+            if(io != null) {
+                deleteQuietly(io.getDestination());
             }
+            rollback(tmpTransactions);
+            throw e;
+        } catch (IOException e) {
+            rollback(tmpTransactions);
             throw e;
         }
+        deleteAllPaths(destDir, tmpDestinations);
+    }
+    
+    private void deleteQuietly(Path p) {
+        try {
+            Files.delete(p);
+        } catch(IOException e) {
+            
+        }
+    }
+    
+    private void deleteAllPaths(Path destDir, Collection<Path> paths) throws IOException {
         boolean deletedAll = true;
-        for(Path tmpDestPath : tmpDestinations) {
+        for(Path tmpDestPath : paths) {
             deletedAll &= tmpDestPath.toFile().delete();
         }
         if(!deletedAll) {
             throw new IOException("Unable to delete an existing episode that is to be replaced. Check " + destDir + " for .tmp files.");
+        }
+    }
+    
+    private void rollback(Stack<IOOperation> transactions) {
+        IOOperation io;
+        while((io = transactions.pop()) != null) {
+            //Display.onIORollback(io);
+            io.rollback();
         }
     }
     
