@@ -35,7 +35,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -55,13 +54,13 @@ public abstract class IOOperation {
     }
     
     public static IOOperation fromType(Type type) {
-        return type == Type.COPY ? new Copy() : new Move();
+        return type == Type.COPY ? new CopyOperation() : new MoveOperation();
     }
     
     protected Path source;
     protected Path destination;
     
-    public abstract IOOperation start() throws IOException;
+    public abstract IOOperation startNative() throws IOException;
     
     public abstract IOOperation startProgress() throws IOException;
     
@@ -70,11 +69,6 @@ public abstract class IOOperation {
     public abstract Type getType();
     
     public abstract IOOperation newInstance();
-    
-    public IOOperation start(Path source, Path destination) throws IOException {
-        setOperands(source, destination);
-        return start();
-    }
     
     public void rollback() {
         try {
@@ -117,72 +111,10 @@ public abstract class IOOperation {
     private void displayIOProgress(IOProgress p) throws IOException {
         if(p.wasError()) {
             Display.onIOProgress(p);
-            Display.onPostIO();
+            Display.onPostIO(false);
             throw p.getError();
         }
         Display.onIOProgress(p);
-    }
-    
-    public static class Move extends IOOperation {        
-        @Override
-        public IOOperation start() throws IOException {
-            try {
-                Files.move(source, destination, StandardCopyOption.REPLACE_EXISTING);
-            } catch(IOException ex) {
-                throw new IOException("@|yellow Notice|@: Unable to move the file.", ex);
-            }
-            return this;
-        }
-        
-        @Override
-        public IOOperation startProgress() throws IOException {
-            doIO(source, destination);
-            return this;
-        }
-
-        @Override
-        public void rollbackOrThrow() throws IOException {
-            Files.move(destination, source, StandardCopyOption.REPLACE_EXISTING);
-        }
-
-        @Override
-        public Type getType() {
-            return Type.MOVE;
-        }
-
-        @Override
-        public IOOperation newInstance() {
-            return new Move();
-        }
-    }
-    
-    public static class Copy extends IOOperation {
-        @Override
-        public IOOperation start() throws IOException {
-            Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
-            return this;
-        }
-        
-        @Override
-        public IOOperation startProgress() throws IOException {
-            doIO(source, destination);
-            return this;
-        }
-        
-        @Override
-        public void rollbackOrThrow() throws IOException {
-            Files.delete(destination);
-        }
-
-        @Override
-        public Type getType() {
-            return Type.COPY;
-        }
-
-        @Override
-        public IOOperation newInstance() {
-            return new Copy();
-        }
     }
     
     private class ThreadIOProgress implements Runnable {

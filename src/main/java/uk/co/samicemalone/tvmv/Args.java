@@ -37,7 +37,9 @@ import java.util.ArrayList;
 import java.util.List;
 import uk.co.samicemalone.libtv.VideoFilter;
 import uk.co.samicemalone.tvmv.exception.OSNotSupportedException;
+import uk.co.samicemalone.tvmv.io.CopyOperation;
 import uk.co.samicemalone.tvmv.io.IOOperation;
+import uk.co.samicemalone.tvmv.io.MoveOperation;
 
 /**
  *
@@ -45,9 +47,10 @@ import uk.co.samicemalone.tvmv.io.IOOperation;
  */
 public class Args {
     
+    private boolean isNativeIO = false;
     private boolean isReplace = false;
     private boolean isSkipNotMatched = false;
-    private IOOperation ioOperation = new IOOperation.Move();
+    private IOOperation ioOperation = new MoveOperation();
     private final List<String> inputFiles;
 
     private Args() {
@@ -56,6 +59,14 @@ public class Args {
 
     private static Args newInstance() {
         return new Args();
+    }
+
+    /**
+     * Checks if the Native IO flag is set
+     * @return true if set, false otherwise
+     */
+    public boolean isNativeIOSet() {
+        return isNativeIO;
     }
 
     /**
@@ -110,11 +121,15 @@ public class Args {
             switch(arg) {
                 case "-c":
                 case "--copy":
-                    returnArgs.ioOperation = new IOOperation.Copy();
+                    returnArgs.ioOperation = new CopyOperation();
                     break;
                 case "-h":
                 case "--help":
                     return null;
+                case "-n":
+                case "--native":
+                    returnArgs.isNativeIO = true;
+                    break;
                 case "-r":
                 case "--replace":
                     returnArgs.isReplace = true;

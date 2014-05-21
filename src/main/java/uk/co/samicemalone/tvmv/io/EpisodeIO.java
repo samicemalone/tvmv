@@ -53,9 +53,11 @@ import uk.co.samicemalone.tvmv.model.Stack;
 public class EpisodeIO {
 
     private final AliasedTVLibrary tvLibrary;
+    private final boolean useNativeIO;
 
-    public EpisodeIO(AliasedTVLibrary tvLibrary) {
+    public EpisodeIO(AliasedTVLibrary tvLibrary, boolean useNativeIO) {
         this.tvLibrary = tvLibrary;
+        this.useNativeIO = useNativeIO;
     }
     
     /**
@@ -63,7 +65,7 @@ public class EpisodeIO {
      * IO operation destination path uses the same file name as the source path
      * but the directory is specified by destinationDir
      * @param iop IOOperation used to determine operation type e.g. copy or move
-     * @param sourceEpisode EpisodeMatch to start IO
+     * @param sourceEpisode EpisodeMatch to startNative IO
      * @param destinationDir destination path to store the source episode
      * @throws IOException if the destination file already exists or
      * if an IO error occurs
@@ -74,9 +76,13 @@ public class EpisodeIO {
             throw new FileAlreadyExistsException(sourceEpisode.getEpisodeFile().getAbsolutePath(), destPath.toString(), "Destination file already exists.");
         }
         iop.setOperands(sourceEpisode.getEpisodeFile().toPath(), destPath);
-        Display.onPreIO(iop);
-        iop.startProgress();
-        Display.onPostIO();
+        Display.onPreIO(iop, useNativeIO);
+        if(useNativeIO) {
+            iop.startNative();
+        } else {
+            iop.startProgress();
+        }
+        Display.onPostIO(useNativeIO);
     }
     
     /**
@@ -102,17 +108,17 @@ public class EpisodeIO {
                 String destFileName = destMatch.getEpisodeFile().getName();
                 Path tmpPath = Files.createTempFile(destDir, destFileName, ".old.tmp");
                 tmpDestinations.add(tmpPath);
-                io = new IOOperation.Move().setOperands(destMatch.getEpisodeFile().toPath(), tmpPath);
+                io = new MoveOperation().setOperands(destMatch.getEpisodeFile().toPath(), tmpPath);
                 Display.onPreIORemoveOld(destFileName);
-                tmpTransactions.push(io.start());
+                tmpTransactions.push(io.startNative());
             }
             Display.onPreReplace(iop.getType(), mapping.getDestination().size());
             for(EpisodeMatch sourceMatch : mapping.getSource()) {
                 Path destPath = destDir.resolve(sourceMatch.getEpisodeFile().getName());
                 io = iop.newInstance().setOperands(sourceMatch.getEpisodeFile().toPath(), destPath);
-                Display.onPreIOReplace(io);
-                tmpTransactions.push(io.startProgress());
-                Display.onPostIOReplace();
+                Display.onPreIOReplace(io, useNativeIO);
+                tmpTransactions.push(useNativeIO ? io.startNative() : io.startProgress());
+                Display.onPostIOReplace(useNativeIO);
             }
         } catch (FileStillExistsException e) {
             if(io != null) {

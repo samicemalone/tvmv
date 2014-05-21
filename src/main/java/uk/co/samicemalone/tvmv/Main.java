@@ -66,7 +66,7 @@ public class Main {
             List<String> sources = SourceReader.read();
             AliasedTVLibrary library = new AliasedTVLibrary(sources, aliasMap);
             EpisodeMatcher matcher = new EpisodeMatcher(arguments.isSkipNotMatchedSet());
-            EpisodeIO episodeIO = new EpisodeIO(library);
+            EpisodeIO episodeIO = new EpisodeIO(library, arguments.isNativeIOSet());
             List<EpisodeMatch> episodeList = matcher.matchEpisodes(arguments.getInputFiles());
             Set<Path> destPaths = episodeIO.createDestinationDirectories(episodeList);
             if(arguments.isReplaceSet()) {
@@ -93,7 +93,7 @@ public class Main {
     }
     
     public static void printHelp() {
-        System.out.println("Usage:   tvmv FILE|DIR... [-chrs]");
+        System.out.println("Usage:   tvmv FILE|DIR... [-chnrs]");
         System.out.println();
         System.out.println("Matches each episode FILE or each file in DIR to determine the TV show name,");
         System.out.println("season number and episode number. Each episode file will then be moved the");
@@ -106,6 +106,10 @@ public class Main {
         System.out.println();
         System.out.println("   -c, --copy              Copy the input FILEs instead of moving them");
         System.out.println("   -h, --help              Prints this message");
+        System.out.println("   -n, --native            Use Java NIO API's for IO operations instead of");
+        System.out.println("                           Java IO Streams. Native IO will not display a ");
+        System.out.println("                           progress bar, but will avoid a copy and delete");
+        System.out.println("                           from the same filesystem if moving");
         System.out.println("   -r, --replace           Replaces existing episodes");
         System.out.println("   -s, --skip-not-matched  Skip input files that cannot be matched instead");
         System.out.println("                           of exiting");

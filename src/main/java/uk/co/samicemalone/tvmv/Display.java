@@ -67,20 +67,26 @@ public class Display {
         }
     }
     
-    public static void onPreIOReplace(IOOperation iop) {
-        System.out.format("  %s...\n", iop.getSource().getFileName());
+    public static void onPreIOReplace(IOOperation iop, boolean isNativeIO) {
+        System.out.format("  %s...", iop.getSource().getFileName());
+        if(!isNativeIO) {
+            System.out.println();
+        }
     }
     
-    public static void onPostIOReplace() {
-        onPostIO();
+    public static void onPostIOReplace(boolean isNativeIO) {
+        onPostIO(isNativeIO);
     }
     
-    public static void onPreIO(IOOperation iop) {
-        System.out.format("%s %s...\n", getIODescription(iop.getType()), iop.getSource().getFileName());
+    public static void onPreIO(IOOperation iop, boolean isNativeIO) {
+        System.out.format("%s %s...", getIODescription(iop.getType()), iop.getSource().getFileName());
+        if(!isNativeIO) {
+            System.out.println();
+        }
     }
     
-    public static void onPostIO() {
-        System.out.println();
+    public static void onPostIO(boolean isNativeIO) {
+        System.out.println(isNativeIO ? "done" : "");
     }
     
     public static void onSkipNotMatched(Path skippedPath) {
