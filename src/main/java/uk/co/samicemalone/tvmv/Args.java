@@ -28,15 +28,8 @@
  */
 package uk.co.samicemalone.tvmv;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import uk.co.samicemalone.libtv.VideoFilter;
-import uk.co.samicemalone.tvmv.exception.OSNotSupportedException;
 import uk.co.samicemalone.tvmv.io.CopyOperation;
 import uk.co.samicemalone.tvmv.io.IOOperation;
 import uk.co.samicemalone.tvmv.io.MoveOperation;
@@ -144,43 +137,6 @@ public class Args {
             }
         }
         return returnArgs;
-    }
-    
-    /**
-     * Attempts to validate the given arguments. If any of the input files
-     * are in Cygwin format (/cygdrive/) then the Args object will be modified
-     * to store the windows readable path.
-     * An exception will be thrown if any arguments fail validation.
-     * @param args Args
-     * @return Same object reference to args parameter. The object will be
-     * unmodified unless Cygwin path formats are found.
-     * @throws FileNotFoundException if any of the input files cannot be found or
-     * are invalid or none are given
-     */
-    public static Args validate(Args args) throws IOException  {
-        if(args.getInputFiles().isEmpty()) {
-            throw new FileNotFoundException("There were no input files given. Use the --help flag for usage.");
-        }
-        if(!OS.isSupported()) {
-            throw new OSNotSupportedException("Your operating system is not currently supported");
-        }
-        VideoFilter filter = new VideoFilter(true);
-        for(int i = 0; i < args.inputFiles.size(); i++) {
-            String file = args.inputFiles.get(i);
-            if(OS.isCygwinPath(file)) {
-                String winPath = OS.toWindowsPath(file);
-                args.inputFiles.set(i, winPath);
-                file = winPath;
-            }
-            Path p = Paths.get(file);
-            if(!Files.exists(p)) {
-                throw new FileNotFoundException(String.format("The input file %s could not be found", file));
-            }
-            if(!filter.accept(p)) {
-                throw new IOException("The input file " + p.toAbsolutePath().toString() + " is not a valid format");
-            }
-        }
-        return args;
     }
     
 }

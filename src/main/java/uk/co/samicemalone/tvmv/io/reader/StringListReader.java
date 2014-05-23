@@ -30,34 +30,43 @@
 package uk.co.samicemalone.tvmv.io.reader;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Reads UTF8 text from a file path with a callback on every line
+ * Read a file as per ConfigLineReader and add each line to a list
  * @author Sam Malone
  */
-public abstract class FileLineReader {
-
+public class StringListReader extends ConfigLineReader {
+    
     /**
-     * Read the lines of filePath as UTF8 text
-     * @param path file path to read
+     * Read the file at the path given as UTF8 text, treating each line according
+     * to ConfigLineReader, to add each line to a list
+     * @param path Path to the file to read
+     * @return List of config lines in path or empty list if none
      * @throws IOException if unable to read the file
      */
-    public void readFile(Path path) throws IOException {
-        for(String line : Files.readAllLines(path)) {
-            if(!onReadLine(line)) {
-                break;
-            }
-        }
+    public static List<String> read(Path path) throws IOException {
+        StringListReader r = new StringListReader();
+        r.readFile(path);
+        return r.getList();
     }
 
-    /**
-     * Called when a new line is read
-     * @param line
-     * @return true to continue reading, false to stop
-     */
-    protected abstract boolean onReadLine(String line);
+    private final List<String> list;
 
+    public StringListReader() {
+        this.list = new ArrayList<>();
+    }
+    
+    @Override
+    protected boolean onConfigLine(String line) {
+        list.add(line);
+        return true;
+    }
+
+    public List<String> getList() {
+        return list;
+    }
     
 }

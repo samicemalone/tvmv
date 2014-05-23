@@ -40,8 +40,10 @@ import uk.co.samicemalone.libtv.model.AliasMap;
 import uk.co.samicemalone.libtv.model.EpisodeMatch;
 import uk.co.samicemalone.tvmv.exception.OSNotSupportedException;
 import uk.co.samicemalone.tvmv.io.EpisodeIO;
-import uk.co.samicemalone.tvmv.io.SourceReader;
 import uk.co.samicemalone.tvmv.io.reader.AliasReader;
+import uk.co.samicemalone.tvmv.io.reader.ConfigReader;
+import uk.co.samicemalone.tvmv.model.Config;
+import uk.co.samicemalone.tvmv.model.Environment;
 import uk.co.samicemalone.tvmv.model.ReplacementMapping;
 
 /**
@@ -60,13 +62,12 @@ public class Main {
             System.exit(0);
         }
         try {
-            arguments = Args.validate(arguments);
+            Environment env = new Environment(arguments, ConfigReader.read()).initialise();
             AliasMap aliasMap = AliasReader.read(new AliasMap());
-            List<String> sources = SourceReader.read();
-            AliasedTVLibrary library = new AliasedTVLibrary(sources, aliasMap);
+            AliasedTVLibrary library = new AliasedTVLibrary(env.getTvDestinationPaths(), aliasMap);
             EpisodeMatcher matcher = new EpisodeMatcher(arguments.isSkipNotMatchedSet());
             EpisodeIO episodeIO = new EpisodeIO(library, arguments.isNativeIOSet());
-            List<EpisodeMatch> episodeList = matcher.matchEpisodes(arguments.getInputFiles());
+            List<EpisodeMatch> episodeList = matcher.matchEpisodes(env.getSourcePaths());
             Set<Path> destPaths = episodeIO.createDestinationDirectories(episodeList);
             if(arguments.isReplaceSet()) {
                 ReplacementMatcher rMatcher = new ReplacementMatcher();

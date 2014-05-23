@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2013, Sam Malone. All rights reserved.
- * 
+ * Copyright (c) 2014, Sam Malone. All rights reserved.
+ *
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  *  - Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  *  - Redistributions in binary form must reproduce the above copyright notice,
@@ -13,7 +13,7 @@
  *  - Neither the name of Sam Malone nor the names of its contributors may be
  *    used to endorse or promote products derived from this software without
  *    specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -26,49 +26,48 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package uk.co.samicemalone.tvmv.io;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
+package uk.co.samicemalone.tvmv.model;
+
 import java.util.ArrayList;
 import java.util.List;
-import uk.co.samicemalone.tvmv.OS;
-import uk.co.samicemalone.tvmv.exception.OSNotSupportedException;
 
 /**
  *
  * @author Sam Malone
  */
-public class SourceReader {
+public class Config {
     
-    /**
-     * Reads the sources.conf file from the default location
-     * @return list of source paths
-     * @throws OSNotSupportedException if the OS is not supported
-     * @throws FileNotFoundException if the sources.conf file cannot be found
-     */
-    public static List<String> read() throws FileNotFoundException {
-        File f = new File(OS.getDefaultConfigDirectory(), "sources.conf");
-        if(!f.exists()) {
-            throw new FileNotFoundException("Could not find the sources.conf file at " + f.getAbsolutePath());
-        }
-        List<String> list = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF8"))) {
-            String line;
-            while((line = br.readLine()) != null) {
-                if(line.isEmpty() || line.startsWith("#")) {
-                    continue;
-                }
-                list.add(line);
-            }
-        } catch(IOException e) {
-            
-        }
-        return list;
+    private final List<String> destinations;
+    private String source;
+    private String windowsLibrary;
+
+    public Config() {
+        destinations = new ArrayList<>();
+    }
+
+    public void addDestinationPath(String destination) {
+        destinations.add(destination);
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public List<String> getDestinationPaths() {
+        return destinations;
+    }
+
+    public String getWindowsLibrary() {
+        return windowsLibrary;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public void setWindowsLibrary(String windowsLibrary) {
+        this.windowsLibrary = windowsLibrary;
     }
     
 }

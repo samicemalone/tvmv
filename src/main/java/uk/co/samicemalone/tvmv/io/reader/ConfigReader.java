@@ -34,62 +34,68 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import uk.co.samicemalone.libtv.model.AliasMap;
 import uk.co.samicemalone.tvmv.OS;
 import uk.co.samicemalone.tvmv.exception.OSNotSupportedException;
+import uk.co.samicemalone.tvmv.model.Config;
 
 /**
- *
+ * 
  * @author Sam Malone
  */
-public class AliasReader extends KeyValueReader {
-
+public class ConfigReader extends KeyValueReader {
+    
     /**
-     * Reads the aliases.txt file from the current directory. If this is not found,
-     * The default location ({@link OS#getDefaultConfigDirectory()}) will be used
-     * instead. If this file does not exist, an empty AliasMap will be returned.
-     * @param aliasMap AliasMap to read aliases into
-     * @return AliasMap containing the shows and their aliases
-     * @throws IOException if unable to read the file
-     * @throws OSNotSupportedException if os not supported
+     * Read the config file from the current directory. If the file doesn't exist,
+     * the default location will be used ({@link OS#getDefaultConfigDirectory()}).
+     * If this file doesn't exist, a FileNotFoundException is thrown
+     * @return Path to config file
+     * @throws FileNotFoundException if the config cannot be found
+     * @throws OSNotSupportedException if the OS is not supported
+     * @throws IOException if unable to read the config file
      */
-    public static AliasMap read(AliasMap aliasMap) throws IOException {
-        AliasReader r = new AliasReader(aliasMap);
-        try {
-            r.readFile(getAliasFilePath());
-        } catch (FileNotFoundException ex) {
-            
-        }
-        return r.getAliasMap();
+    public static Config read() throws IOException {
+        ConfigReader r = new ConfigReader();
+        r.readFile(getConfigFilePath());
+        return r.getConfig();
     }
     
-    private static Path getAliasFilePath() throws FileNotFoundException {
-        String aliasFileName = "aliases.txt";
-        Path p = Paths.get(".", aliasFileName);
+    private static Path getConfigFilePath() throws FileNotFoundException {
+        String configFileName = "tvmv.conf";
+        Path p = Paths.get(".", configFileName);
         if(Files.exists(p)) {
             return p;
         }
-        p = OS.getDefaultConfigDirectory().toPath().resolve(aliasFileName);
+        p = OS.getDefaultConfigDirectory().toPath().resolve(configFileName);
         if(Files.exists(p)) {
             return p;
         }
-        throw new FileNotFoundException();
+        throw new FileNotFoundException("Config file not found in the current working directory or " + p.getParent());
     }
     
-    private final AliasMap aliasMap;
+    private final Config config;
 
-    public AliasReader(AliasMap aliasMap) {
-        this.aliasMap = aliasMap;
+    public ConfigReader() {
+        config = new Config();
     }
 
-    public AliasMap getAliasMap() {
-        return aliasMap;
-    }
-    
     @Override
     protected boolean onReadKeyValue(String key, String value) {
-        aliasMap.addAlias(key, value);
+        switch(key) {
+            case "SOURCE":
+                config.setSource(value);
+                break;
+            case "DESTINATION":
+                config.addDestinationPath(value);
+                break;
+            case "DESTINATION_LIBRARY":
+                config.setWindowsLibrary(value);
+                break;
+        }
         return true;
+    }
+
+    public Config getConfig() {
+        return config;
     }
     
 }

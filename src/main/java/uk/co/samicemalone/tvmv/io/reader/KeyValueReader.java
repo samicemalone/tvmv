@@ -30,7 +30,7 @@
 package uk.co.samicemalone.tvmv.io.reader;
 
 /**
- *
+ * Read a config file line by line and treat each line as a key value pair
  * @author Sam Malone
  */
 public abstract class KeyValueReader extends ConfigLineReader {
@@ -38,12 +38,20 @@ public abstract class KeyValueReader extends ConfigLineReader {
     @Override
     protected boolean onConfigLine(String line) {
         String[] kvPair = line.split("=", 2);
-        if(!kvPair[0].isEmpty() && !kvPair[1].isEmpty()) {
-            return onReadKeyValue(kvPair[0], kvPair[1]);
+        if(kvPair.length != 2) {
+            return true; // skip
         }
-        return true;
+        String key = kvPair[0].trim();
+        String value = kvPair[1].trim();
+        return !key.isEmpty() && !value.isEmpty() ? onReadKeyValue(key, value) : true;
     }
     
-    public abstract boolean onReadKeyValue(String key, String value);
+    /**
+     * Called when a key value pair are read from a config file
+     * @param key configuration variable
+     * @param value value
+     * @return true to continue reading, false to stop
+     */
+    protected abstract boolean onReadKeyValue(String key, String value);
     
 }
