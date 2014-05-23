@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2013, Sam Malone. All rights reserved.
- * 
+ * Copyright (c) 2014, Sam Malone. All rights reserved.
+ *
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  *  - Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  *  - Redistributions in binary form must reproduce the above copyright notice,
@@ -13,7 +13,7 @@
  *  - Neither the name of Sam Malone nor the names of its contributors may be
  *    used to endorse or promote products derived from this software without
  *    specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -26,16 +26,38 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package uk.co.samicemalone.tvmv.exception;
+
+package uk.co.samicemalone.tvmv.io.reader;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  *
  * @author Sam Malone
  */
-public class ParseException extends Exception {
+public abstract class FileLineReader {
 
-    public ParseException(String message) {
-        super(message);
+    /**
+     * Read the lines of filePath as UTF8 text
+     * @param path file path to read
+     * @throws IOException if unable to read the file
+     */
+    public void readFile(Path path) throws IOException {
+        for(String line : Files.readAllLines(path)) {
+            if(!onReadLine(line)) {
+                break;
+            }
+        }
     }
+
+    /**
+     * Called when a new line is read
+     * @param line
+     * @return true to continue reading, false to stop
+     */
+    protected abstract boolean onReadLine(String line);
+
     
 }

@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2013, Sam Malone. All rights reserved.
- * 
+ * Copyright (c) 2014, Sam Malone. All rights reserved.
+ *
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  *  - Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  *  - Redistributions in binary form must reproduce the above copyright notice,
@@ -13,7 +13,7 @@
  *  - Neither the name of Sam Malone nor the names of its contributors may be
  *    used to endorse or promote products derived from this software without
  *    specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -26,66 +26,70 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package uk.co.samicemalone.tvmv.io;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
+package uk.co.samicemalone.tvmv.io.reader;
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import uk.co.samicemalone.libtv.model.AliasMap;
 import uk.co.samicemalone.tvmv.OS;
 import uk.co.samicemalone.tvmv.exception.OSNotSupportedException;
-import uk.co.samicemalone.tvmv.exception.ParseException;
 
 /**
  *
  * @author Sam Malone
  */
-public class AliasReader {
+public class AliasReader extends KeyValueReader {
     
-    private static final String ALIASES_FILE = "aliases.txt";
-    
+    private final AliasMap aliasMap;
+
     /**
-     * Reads the aliases.txt file from the default location. If the file does
-     * not exist, an empty AliasMap will be returned.
+     * Reads the aliases.txt file from the current directory. If this is not found,
+     * The default location ({@link OS#getDefaultConfigDirectory()}) will be used
+     * instead. If this file does not exist, an empty AliasMap will be returned.
+     * @param aliasMap AliasMap to read aliases into
      * @return AliasMap containing the shows and their aliases
+     * @throws IOException if unable to read the file
      * @throws OSNotSupportedException if os not supported
-     * @throws ParseException if the was an error parsing aliases.txt
      */
-    public static AliasMap read() throws ParseException {
-        File f = new File(OS.getDefaultConfigDirectory(), ALIASES_FILE);
-        AliasMap aliases = new AliasMap();
-        if(!f.exists() && !(f = new File(ALIASES_FILE)).exists()) {
-            return aliases;
-        }
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF8"))) {
-            String line;
-            while((line = br.readLine()) != null) {
-                line = line.trim();
-                if(line.isEmpty() || line.charAt(0) == '#') {
-                    continue;
-                }
-                parseLine(aliases, line);
-            }
-        } catch(IOException e) {
+    public static AliasMap read(AliasMap aliasMap) throws IOException {
+        AliasReader r = new AliasReader(aliasMap);
+        try {
+            r.readFile(getAliasFilePath());
+        } catch (FileNotFoundException ex) {
             
         }
-        return aliases;
+        return r.getAliasMap();
     }
     
-    private static void parseLine(AliasMap aliases, String line) throws ParseException {
-        String key, value;
-        try {
-            int equalsIndex = line.indexOf('=');
-            key = line.substring(0, equalsIndex).trim();
-            value = line.substring(equalsIndex + 1).trim();
-        } catch(IndexOutOfBoundsException ex) {
-            throw new ParseException("Unable to parse the line " + line);
+    private static Path getAliasFilePath() throws FileNotFoundException {
+        String aliasFileName = "aliases.txt";
+        Path p = Paths.get(".", aliasFileName);
+        if(Files.exists(p)) {
+            return p;
         }
-        if(!value.isEmpty()) {
-            aliases.addAlias(key, value);
+        p = OS.getDefaultConfigDirectory().toPath().resolve(aliasFileName);
+        if(Files.exists(p)) {
+            return p;
         }
+        throw new FileNotFoundException();
+    }
+
+    public AliasReader(AliasMap aliasMap) {
+        this.aliasMap = aliasMap;
+    }
+
+    public AliasMap getAliasMap() {
+        return aliasMap;
+    }
+    
+    @Override
+    public boolean onReadKeyValue(String key, String value) {
+        aliasMap.addAlias(key, value);
+        return true;
     }
     
 }

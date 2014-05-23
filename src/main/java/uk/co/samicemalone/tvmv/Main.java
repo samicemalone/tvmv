@@ -39,10 +39,9 @@ import uk.co.samicemalone.libtv.matcher.path.AliasedTVLibrary;
 import uk.co.samicemalone.libtv.model.AliasMap;
 import uk.co.samicemalone.libtv.model.EpisodeMatch;
 import uk.co.samicemalone.tvmv.exception.OSNotSupportedException;
-import uk.co.samicemalone.tvmv.exception.ParseException;
-import uk.co.samicemalone.tvmv.io.AliasReader;
 import uk.co.samicemalone.tvmv.io.EpisodeIO;
 import uk.co.samicemalone.tvmv.io.SourceReader;
+import uk.co.samicemalone.tvmv.io.reader.AliasReader;
 import uk.co.samicemalone.tvmv.model.ReplacementMapping;
 
 /**
@@ -62,7 +61,7 @@ public class Main {
         }
         try {
             arguments = Args.validate(arguments);
-            AliasMap aliasMap = AliasReader.read();
+            AliasMap aliasMap = AliasReader.read(new AliasMap());
             List<String> sources = SourceReader.read();
             AliasedTVLibrary library = new AliasedTVLibrary(sources, aliasMap);
             EpisodeMatcher matcher = new EpisodeMatcher(arguments.isSkipNotMatchedSet());
@@ -81,7 +80,7 @@ public class Main {
                     episodeIO.start(arguments.getIOOperation(), e, destDir);
                 }
             }
-        } catch(IOException | ParseException | IllegalStateException | OSNotSupportedException | MatchException e) {
+        } catch(IOException | IllegalStateException | OSNotSupportedException | MatchException e) {
             AnsiConsole.err.println(Ansi.ansi().render(e.getMessage()));
             Throwable t = e.getCause();
             if(t != null) {
