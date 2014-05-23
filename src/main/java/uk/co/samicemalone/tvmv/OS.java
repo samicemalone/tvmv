@@ -49,15 +49,14 @@ public class OS {
     public static File getDefaultConfigDirectory() {
         if(isWindows) {
             return new File("C:\\ProgramData\\" + System.getProperty("user.name"), "tvmv/");
-        }
-        if(isUnix) {
+        } else if(isUnix || isMac) {
             return new File(System.getProperty("user.home") + "/.config/", "tvmv/");
         }
         throw new OSNotSupportedException("Your operating system is not currently supported");
     }
     
     public static boolean isSupported() {
-        return isWindows || isUnix;
+        return isWindows || isUnix || isMac;
     }
     
     public static boolean isCygwinPath(String path) {
