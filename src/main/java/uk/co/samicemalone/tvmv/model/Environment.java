@@ -88,7 +88,7 @@ public class Environment {
             }
         } else if(config.getSource() != null) {
             VideoFilter filter = new VideoFilter();
-            for(Path path : PathUtil.listPaths(Paths.get(config.getSource()), filter)) {
+            for(Path path : PathUtil.listPaths(Paths.get(toFormattedPath(config.getSource())), filter)) {
                 sourcePaths.add(path.toString());
             }
         }
