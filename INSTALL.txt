@@ -11,17 +11,9 @@ This file describes the installation of "tvmv" on your machine.
 * This application was written in Java. To run the application, a Java virtual
    machine has to be installed. This can be provided via Oracle's Java Runtime 
    Environment (JRE). The minimum JRE version that this application supports is
-   1.6. See: http://java.com/en/download/index.jsp
+   1.7. See: http://java.com/en/download/index.jsp
 
- * Apache Ant 1.8.3. is required to build from source.
-
-===============================================================================
- External Libraries
-===============================================================================
-
-This application uses the Apache Commons IO library (lib/commons-io-2.4.jar).
-The sources are available from 
-http://commons.apache.org/proper/commons-io/download_io.cgi.
+* Apache Maven is used as the build environment.
 
 ===============================================================================
  Build 
@@ -29,25 +21,27 @@ http://commons.apache.org/proper/commons-io/download_io.cgi.
 
 To build the application, run the following command:
 
-    ant jar
+    mvn install
+
+This will create tvmv.jar file in the "target" directory
 		
 ===============================================================================
  Configuration
 ===============================================================================
 
-The program, by default, looks for the configuration files in the following
-directory for your operating system:
+The program, by default, looks for the configuration files in the current
+working directory. If the configuration/alias file isn't found, the
+following directory will be checked on your operating system:
 
-      Linux default:     $HOME/.config/tvmv/
+        Mac default:     $HOME/.config/tvmv/
+       UNIX default:     $HOME/.config/tvmv/
     Windows default:     C:\ProgramData\$USER\tvmv\
 
-You need to create a sources.conf file in the configuration directory. It
-should contain a list of TV folder sources, one per line. This file is
-required.
+See sample.tvmv.conf for more information.
 
 If you wish to add any show aliases, you should create an aliases.txt file in
 the configuration directory. This file is optional. The file sample.aliases.txt
-in the repository shows an example of how to use this file. There is also more
+shows an example of how to use this file. There is also more
 information about configuration files in the FILES section in README.txt
 
 ===============================================================================
@@ -57,17 +51,19 @@ information about configuration files in the FILES section in README.txt
 Assuming the java executable is in your $PATH variable, you run the program as
 follows:
 
-    java -jar /path/to/tvmv.jar FILE... [-hr]
+    java -jar /path/to/tvmv.jar FILE...|DIR... [-chnrs]
 
-Where FILE... are the input episodes to be given to the program. For more 
-information about the arguments, program usage, and examples, see README.txt.
+For more information about the arguments, program usage, and examples, see
+README.txt.
 
 It is recommended to create an alias to the program to avoid having to type
 repeated java arguments and paths. For example, when using BASH, add a line 
 similar to the following example to ~/.bash_aliases
 
     alias tvmv='java -jar /path/to/tvmv.jar'
+    alias tvcp='java -jar /path/to/tvmv.jar -c'
 
 This allows you to run the program by its alias e.g.
 
     tvmv /path/to/some.show.s01e01.show.name.avi
+    tvcp /path/to/some.show.s01e01.show.name.avi
