@@ -42,7 +42,6 @@ import uk.co.samicemalone.tvmv.exception.OSNotSupportedException;
 import uk.co.samicemalone.tvmv.io.EpisodeIO;
 import uk.co.samicemalone.tvmv.io.reader.AliasReader;
 import uk.co.samicemalone.tvmv.io.reader.ConfigReader;
-import uk.co.samicemalone.tvmv.model.Config;
 import uk.co.samicemalone.tvmv.model.Environment;
 import uk.co.samicemalone.tvmv.model.ReplacementMapping;
 
