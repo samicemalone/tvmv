@@ -36,56 +36,53 @@ import java.util.List;
  *
  * @author Sam Malone
  */
-public class Config {
+public class WindowsLibrary {
     
-    private final List<String> destinations;
-    private String source;
-    private String windowsLibrary;
-    private String createShowsFile;
-    private String createDestShowDir;
+    private final List<String> locations;
+    
+    private int defaultSaveIndex;
 
-    public Config() {
-        destinations = new ArrayList<>();
+    public WindowsLibrary() {
+        locations = new ArrayList<>();
     }
 
-    public void addDestinationPath(String destination) {
-        destinations.add(destination);
-    }
-
-    public String getSource() {
-        return source;
-    }
-
-    public List<String> getDestinationPaths() {
-        return destinations;
-    }
-
-    public String getWindowsLibrary() {
-        return windowsLibrary;
-    }
-
-    public void setSource(String source) {
-        this.source = source;
-    }
-
-    public void setWindowsLibrary(String windowsLibrary) {
-        this.windowsLibrary = windowsLibrary;
-    }
-
-    public String getCreateShowsFile() {
-        return createShowsFile;
-    }
-
-    public void setCreateShowsFile(String createShowsFile) {
-        this.createShowsFile = createShowsFile;
-    }
-
-    public String getCreateDestShowDir() {
-        return createDestShowDir;
-    }
-
-    public void setCreateDestShowDir(String createDestShowDir) {
-        this.createDestShowDir = createDestShowDir;
+    public void setDefaultSaveIndex(int defaultSaveIndex) {
+        this.defaultSaveIndex = defaultSaveIndex;
     }
     
+    public void addDirectoryLocation(String dir) {
+        locations.add(dir);
+    }
+    
+    public void addDirectoryLocation(String dir, boolean isDefaultSaveLocation) {
+        locations.add(dir);
+        if(isDefaultSaveLocation) {
+            defaultSaveIndex = locations.size() - 1;
+        }
+    }
+    
+    /**
+     * Check whether this Windows Library contains any directory locations
+     * @return true if empty, false otherwise
+     */
+    public boolean isEmpty() {
+        return locations.isEmpty();
+    }
+
+    /**
+     * Get the location of the directories that make up this library
+     * @return 
+     */
+    public List<String> getLocations() {
+        return locations;
+    }
+    
+    /**
+     * Get the default save location directory for the library
+     * @throws IndexOutOfBoundsException if invalid save index set
+     * @return 
+     */
+    public String getDefaultSaveLocation() {
+        return locations.get(defaultSaveIndex);
+    }
 }

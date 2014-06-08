@@ -90,6 +90,12 @@ public class ConfigReader extends KeyValueReader {
             case "DESTINATION_LIBRARY":
                 config.setWindowsLibrary(value);
                 break;
+            case "CREATE_SHOWS_FILE":
+                config.setCreateShowsFile(value);
+                break;
+            case "CREATE_SHOWS_DEST":
+                config.setCreateDestShowDir(value);
+                break;
         }
         return true;
     }

@@ -29,31 +29,57 @@
 
 package uk.co.samicemalone.tvmv.io;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 import uk.co.samicemalone.tvmv.OS;
+import uk.co.samicemalone.tvmv.model.WindowsLibrary;
 
 /**
  *
  * @author Sam Malone
  */
-public class WindowsLibraryReader {
-
+public class WindowsLibraryParser extends DefaultHandler {
+    
+    /**
+     * Parse a Windows Library to get a list of absolute paths to the directories that make up the library
+     * @param libraryName Windows Library Name or "?" to detect TV library (see {@link #findTVLibraryPath()})
+     * @return WindowsLibrary containing list of paths of the directories in the given library, or an empty
+     * list if the library is empty or does not exist
+     */
+    public static WindowsLibrary parse(String libraryName) {
+        Path libraryPath = "?".equals(libraryName) ? findTVLibraryPath() : getLibraryPath(libraryName);
+        if(libraryPath == null) {
+            return new WindowsLibrary();
+        }
+        return parse(libraryPath.toFile());
+    }
+    
+    /**
+     * Parse a Windows Library to get a list of absolute paths to the directories that make up the library
+     * @param msLibraryPath Path to the .library-ms file (must exist)
+     * @return WindowsLibrary containing list of paths of the directories in the given library, or an empty
+     * list if the library is empty or does not exist
+     */
+    public static WindowsLibrary parse(File msLibraryPath) {
+        WindowsLibraryParser lp = new WindowsLibraryParser();
+        try {
+            SAXParser sax = SAXParserFactory.newInstance().newSAXParser();
+            sax.parse(msLibraryPath, lp);
+        } catch(SAXException | ParserConfigurationException | IOException ex) {
+            
+        }
+        return lp.getWindowsLibrary();
+    }
+    
     /**
      * Check if the operating system is Windows and supports Libraries.
      * Currently only Windows 7 and 8 are supported.
@@ -82,44 +108,7 @@ public class WindowsLibraryReader {
         return Files.exists(p) ? p : null;
     }
     
-    /**
-     * Gets a list of absolute paths to the directories that make up the library
-     * @param libraryName Windows Library Name or "?" to detect TV library (see {@link #findTVLibraryPath()})
-     * @return List of paths of the directories in the given library, or an empty
-     * list if the library is empty or does not exist
-     */
-    public static List<String> listLibraryDirectories(String libraryName) {
-        List<String> dirs = new ArrayList<>();
-        Path libraryPath = "?".equals(libraryName) ? findTVLibraryPath() : getLibraryPath(libraryName);
-        if(libraryPath == null) {
-            return dirs;
-        }
-        return listLibraryDirectorires(libraryPath);
-    }
-    
-    /**
-     * Gets a list of absolute paths to the directories that make up the library
-     * @param libraryPath Path to the .library-ms file (must exist)
-     * @return List of paths of the directories in the given library, or an empty
-     * list if the library is empty or does not exist
-     */
-    public static List<String> listLibraryDirectorires(Path libraryPath) {
-        List<String> dirs = new ArrayList<>();
-        DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
-        try {
-            Document doc = domFactory.newDocumentBuilder().parse(libraryPath.toFile());
-            XPath xpath = XPathFactory.newInstance().newXPath();
-            XPathExpression expr = xpath.compile("/libraryDescription/searchConnectorDescriptionList/searchConnectorDescription/simpleLocation/url/text()");
-            NodeList nodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-            for (int i = 0; i < nodes.getLength(); i++) {
-                dirs.add(nodes.item(i).getNodeValue()); 
-            }
-        } catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException | DOMException e) {
-            
-        }
-        return dirs;
-    }
-    
+        
     /**
      * Find the TV .library-ms file path. The "TV" library will be checked first
      * and if not found then "Television" will be checked.
@@ -128,6 +117,54 @@ public class WindowsLibraryReader {
     public static Path findTVLibraryPath() {
         Path libraryPath = getLibraryPath("TV");
         return libraryPath == null ? getLibraryPath("Television") : libraryPath;
+    }
+    
+    private final WindowsLibrary l;
+    
+    private StringBuilder chars;
+    
+    private String curLocation;
+    private boolean isDefaultSaveLocation;
+    
+    public WindowsLibraryParser() {
+        chars = new StringBuilder();
+        l = new WindowsLibrary();
+    }
+
+    private WindowsLibrary getWindowsLibrary() {
+        return l;
+    }
+
+    @Override
+    public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+        switch(qName) {
+            case "isDefaultSaveLocation":
+            case "url":
+                chars = new StringBuilder();
+                break;
+        }
+    }
+
+    @Override
+    public void endElement(String uri, String localName, String qName) throws SAXException {
+        switch(qName) {
+            case "searchConnectorDescription":
+                l.addDirectoryLocation(curLocation, isDefaultSaveLocation);
+                isDefaultSaveLocation = false;
+            case "isDefaultSaveLocation":
+                if("true".equals(chars.toString())) {
+                    isDefaultSaveLocation = true;
+                }
+                break;
+            case "url":
+                curLocation = chars.toString();
+                break;
+        }
+    }
+
+    @Override
+    public void characters(char[] ch, int start, int length) throws SAXException {
+        chars.append(ch, start, length);
     }
     
 }

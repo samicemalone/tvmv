@@ -36,12 +36,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import uk.co.samicemalone.libtv.VideoFilter;
 import uk.co.samicemalone.libtv.util.PathUtil;
 import uk.co.samicemalone.tvmv.Args;
 import uk.co.samicemalone.tvmv.OS;
 import uk.co.samicemalone.tvmv.exception.OSNotSupportedException;
-import uk.co.samicemalone.tvmv.io.WindowsLibraryReader;
+import uk.co.samicemalone.tvmv.io.WindowsLibraryParser;
 
 /**
  *
@@ -53,6 +54,9 @@ public class Environment {
     private final Config config;
     private final List<String> sourcePaths;
     private final List<String> tvDestinationPaths;
+    
+    private String createShowsFile;
+    private String createDestShowsDir;
     
     /**
      * Create a new Environment instance.
@@ -92,10 +96,13 @@ public class Environment {
                 sourcePaths.add(path.toString());
             }
         }
-        if(WindowsLibraryReader.isOSSupported() && config.getWindowsLibrary() != null) {
-            List<String> libraryDirs = WindowsLibraryReader.listLibraryDirectories(config.getWindowsLibrary());
-            for(String path : libraryDirs) {
+        if(WindowsLibraryParser.isOSSupported() && config.getWindowsLibrary() != null) {
+            WindowsLibrary lib = WindowsLibraryParser.parse(config.getWindowsLibrary());
+            for(String path : lib.getLocations()) {
                 addDestPathIfExists(Paths.get(path));
+            }
+            if(!lib.isEmpty() && "?".equals(config.getCreateDestShowDir())) {
+                createDestShowsDir = lib.getDefaultSaveLocation();
             }
         }
         for(String path : config.getDestinationPaths()) {
@@ -103,6 +110,13 @@ public class Environment {
         }
         if(tvDestinationPaths.isEmpty()) {
             throw new FileNotFoundException("No TV destination paths found.\nEnsure the DESTINATION (or DESTINATION_LIBRARY in Windows 7/8) is set in tvmv.conf");
+        }
+        if(!StringUtils.isEmpty(config.getCreateShowsFile()) && Files.exists(Paths.get(config.getCreateShowsFile()))) {
+            createShowsFile = config.getCreateShowsFile();
+        }
+        String dir = config.getCreateDestShowDir();
+        if(!StringUtils.isEmpty(dir) && !"?".equals(dir) && Files.exists(Paths.get(dir))) {
+            createDestShowsDir = config.getCreateDestShowDir();
         }
         return this;
     }
@@ -113,6 +127,14 @@ public class Environment {
 
     public List<String> getTvDestinationPaths() {
         return tvDestinationPaths;
+    }
+
+    public String getCreateShowsFile() {
+        return createShowsFile;
+    }
+
+    public String getCreateDestShowsDir() {
+        return createDestShowsDir;
     }
     
     private void addDestPathIfExists(Path p) {

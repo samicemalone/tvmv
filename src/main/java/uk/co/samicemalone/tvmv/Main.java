@@ -29,7 +29,9 @@
 package uk.co.samicemalone.tvmv;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
 import org.fusesource.jansi.Ansi;
@@ -42,6 +44,7 @@ import uk.co.samicemalone.tvmv.exception.OSNotSupportedException;
 import uk.co.samicemalone.tvmv.io.EpisodeIO;
 import uk.co.samicemalone.tvmv.io.reader.AliasReader;
 import uk.co.samicemalone.tvmv.io.reader.ConfigReader;
+import uk.co.samicemalone.tvmv.io.reader.StringListReader;
 import uk.co.samicemalone.tvmv.model.Environment;
 import uk.co.samicemalone.tvmv.model.ReplacementMapping;
 
@@ -66,6 +69,14 @@ public class Main {
             AliasedTVLibrary library = new AliasedTVLibrary(env.getTvDestinationPaths(), aliasMap);
             EpisodeMatcher matcher = new EpisodeMatcher(arguments.isSkipNotMatchedSet());
             EpisodeIO episodeIO = new EpisodeIO(library, arguments.isNativeIOSet());
+            if(env.getCreateShowsFile() != null && env.getCreateDestShowsDir() != null) {
+                for(String showName : StringListReader.read(Paths.get(env.getCreateShowsFile()))) {
+                    Path toCreate = Paths.get(env.getCreateDestShowsDir(), showName);
+                    if(!Files.exists(toCreate)) {
+                        Files.createDirectory(toCreate);
+                    }
+                }
+            }
             List<EpisodeMatch> episodeList = matcher.matchEpisodes(env.getSourcePaths());
             Set<Path> destPaths = episodeIO.createDestinationDirectories(episodeList);
             if(arguments.isReplaceSet()) {
