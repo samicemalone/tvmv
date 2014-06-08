@@ -30,6 +30,7 @@
 package uk.co.samicemalone.tvmv.io.reader;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -45,7 +46,7 @@ public abstract class FileLineReader {
      * @throws IOException if unable to read the file
      */
     public void readFile(Path path) throws IOException {
-        for(String line : Files.readAllLines(path)) {
+        for(String line : Files.readAllLines(path, StandardCharsets.UTF_8)) {
             if(!onReadLine(line)) {
                 break;
             }
