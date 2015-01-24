@@ -45,6 +45,7 @@ import uk.co.samicemalone.tvmv.io.EpisodeIO;
 import uk.co.samicemalone.tvmv.io.reader.AliasReader;
 import uk.co.samicemalone.tvmv.io.reader.ConfigReader;
 import uk.co.samicemalone.tvmv.io.reader.StringListReader;
+import uk.co.samicemalone.tvmv.model.Config;
 import uk.co.samicemalone.tvmv.model.Environment;
 import uk.co.samicemalone.tvmv.model.ReplacementMapping;
 
@@ -58,40 +59,16 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        Args arguments = Args.parse(args);
-        if(arguments == null) {
-            printHelp();
-            System.exit(0);
-        }
         try {
-            Environment env = new Environment(arguments, ConfigReader.read()).initialise();
-            AliasMap aliasMap = AliasReader.read(new AliasMap());
-            AliasedTVLibrary library = new AliasedTVLibrary(env.getTvDestinationPaths(), aliasMap);
-            EpisodeMatcher matcher = new EpisodeMatcher(arguments.isSkipNotMatchedSet());
-            EpisodeIO episodeIO = new EpisodeIO(library, arguments.isNativeIOSet());
-            if(env.getCreateShowsFile() != null && env.getCreateDestShowsDir() != null) {
-                for(String showName : StringListReader.read(Paths.get(env.getCreateShowsFile()))) {
-                    Path toCreate = Paths.get(env.getCreateDestShowsDir(), showName);
-                    if(!Files.exists(toCreate)) {
-                        Files.createDirectory(toCreate);
-                    }
-                }
+            Args arguments = Args.parse(args);
+            if(arguments == null) {
+                printHelp();
+                System.exit(0);
             }
-            List<EpisodeMatch> episodeList = matcher.matchEpisodes(env.getSourcePaths());
-            Set<Path> destPaths = episodeIO.createDestinationDirectories(episodeList);
-            if(arguments.isReplaceSet()) {
-                ReplacementMatcher rMatcher = new ReplacementMatcher();
-                Set<ReplacementMapping<Set<EpisodeMatch>>> rm = rMatcher.matchReplacements(episodeList, destPaths);
-                for(ReplacementMapping<Set<EpisodeMatch>> replacementMapping : rm) {
-                    episodeIO.replaceEpisode(arguments.getIOOperation(), replacementMapping);
-                }
-            } else {
-                for(EpisodeMatch e : episodeList) {
-                    Path destDir = library.newEpisodesPath(e.getShow(), e.getSeason());
-                    episodeIO.start(arguments.getIOOperation(), e, destDir);
-                }
-            }
-        } catch(IOException | IllegalStateException | OSNotSupportedException | MatchException e) {
+            Config config = ConfigReader.read(arguments.getConfigFile());
+            Environment env = new Environment(arguments, config).initialise();
+            run(env);
+        } catch(Exception e) {
             AnsiConsole.err.println(Ansi.ansi().render(e.getMessage()));
             Throwable t = e.getCause();
             if(t != null) {
@@ -99,6 +76,35 @@ public class Main {
                 System.err.println(t.getMessage());
             }
             System.exit(1);
+        }
+    }
+    
+    private static void run(Environment env) throws IOException, IllegalStateException, OSNotSupportedException, MatchException{
+        AliasMap aliasMap = AliasReader.read(new AliasMap());
+        AliasedTVLibrary library = new AliasedTVLibrary(env.getTvDestinationPaths(), aliasMap);
+        EpisodeMatcher matcher = new EpisodeMatcher(env.getArgs().isSkipNotMatchedSet());
+        EpisodeIO episodeIO = new EpisodeIO(library, env.getArgs().isNativeIOSet());
+        if(env.getCreateShowsFile() != null && env.getCreateDestShowsDir() != null) {
+            for(String showName : StringListReader.read(Paths.get(env.getCreateShowsFile()))) {
+                Path toCreate = Paths.get(env.getCreateDestShowsDir(), showName);
+                if(!Files.exists(toCreate)) {
+                    Files.createDirectory(toCreate);
+                }
+            }
+        }
+        List<EpisodeMatch> episodeList = matcher.matchEpisodes(env.getSourcePaths());
+        Set<Path> destPaths = episodeIO.createDestinationDirectories(episodeList);
+        if(env.getArgs().isReplaceSet()) {
+            ReplacementMatcher rMatcher = new ReplacementMatcher();
+            Set<ReplacementMapping<Set<EpisodeMatch>>> rm = rMatcher.matchReplacements(episodeList, destPaths);
+            for(ReplacementMapping<Set<EpisodeMatch>> replacementMapping : rm) {
+                episodeIO.replaceEpisode(env.getArgs().getIOOperation(), replacementMapping);
+            }
+        } else {
+            for(EpisodeMatch e : episodeList) {
+                Path destDir = library.newEpisodesPath(e.getShow(), e.getSeason());
+                episodeIO.start(env.getArgs().getIOOperation(), e, destDir);
+            }
         }
     }
     
@@ -114,6 +120,7 @@ public class Main {
         System.out.println("because episode 2 would be removed. For this replacement to succeed,");
         System.out.println("\"24 - s01e02\" must also exist as an input episode file.");
         System.out.println();
+        System.out.println("   --config FILE           Use this specific tvmv.conf file");
         System.out.println("   -c, --copy              Copy the input FILEs instead of moving them");
         System.out.println("   -h, --help              Prints this message");
         System.out.println("   -n, --native            Use Java NIO API's for IO operations instead of");

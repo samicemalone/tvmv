@@ -40,6 +40,9 @@ OPTIONS
       The DIR argument(s) are the file paths for directories that contain
       episode files to be moved or copied. Can be used with FILE.
       
+   --config FILE
+      Read the tvmv.conf config file from the path FILE
+
    -c, --copy
       This flag makes tvmv copy the input episode FILEs instead of moving them.
 
@@ -101,6 +104,9 @@ FILES
             CSI NY=CSI New York
 
    Default Configuration Directories
+      The current directory is first checked for tvmv.conf, and if not found,
+      the following directories are checked:
+
       Windows C:\ProgramData\$USER\tvmv\
       Linux ~/.config/tvmv/
       Mac /Users/.config/tvmv/

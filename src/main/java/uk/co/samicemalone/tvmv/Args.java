@@ -43,6 +43,7 @@ public class Args {
     private boolean isNativeIO = false;
     private boolean isReplace = false;
     private boolean isSkipNotMatched = false;
+    private String configFile;
     private IOOperation ioOperation = new MoveOperation();
     private final List<String> inputFiles;
 
@@ -79,6 +80,14 @@ public class Args {
     }
 
     /**
+     * Get the path to configuration file
+     * @return path to configuration file
+     */
+    public String getConfigFile() {
+        return configFile;
+    }
+
+    /**
      * Get the IO Operation specified
      * The default value is {@link IOOperation.Move}
      * @return IO Operation
@@ -110,33 +119,58 @@ public class Args {
      */
     public static Args parse(String[] args) {
         Args returnArgs = newInstance();
-        for(String arg : args) {
-            switch(arg) {
-                case "-c":
-                case "--copy":
-                    returnArgs.ioOperation = new CopyOperation();
-                    break;
-                case "-h":
-                case "--help":
-                    return null;
-                case "-n":
-                case "--native":
-                    returnArgs.isNativeIO = true;
-                    break;
-                case "-r":
-                case "--replace":
-                    returnArgs.isReplace = true;
-                    break;
-                case "-s":
-                case "--skip-not-matched":
-                    returnArgs.isSkipNotMatched = true;
-                    break;
-                default:
-                    returnArgs.addInputFile(arg);
-                    break;
+        boolean isArg = false;
+        for(int i = 0; i < args.length; i++) {
+            if(isArg) {
+                continue;
             }
+            isArg = parseArgument(returnArgs, args, i);
         }
         return returnArgs;
+    }
+    
+    /**
+     * 
+     * @param returnArgs
+     * @param args
+     * @param index
+     * @return true if next argument is the argument value, false otherwise
+     */
+    private static boolean parseArgument(Args returnArgs, String[] args, int index) {
+        switch(args[index]) {
+            case "-c":
+            case "--copy":
+                returnArgs.ioOperation = new CopyOperation();
+                return false;
+            case "--config":
+                returnArgs.configFile = getArgument(args, index+1);
+                return true;
+            case "-h":
+            case "--help":
+                return false;
+            case "-n":
+            case "--native":
+                returnArgs.isNativeIO = true;
+                return false;
+            case "-r":
+            case "--replace":
+                returnArgs.isReplace = true;
+                return false;
+            case "-s":
+            case "--skip-not-matched":
+                returnArgs.isSkipNotMatched = true;
+                return false;
+            default:
+                returnArgs.addInputFile(args[index]);
+                return false;
+        }
+    }
+    
+    private static String getArgument(String[] args, int index) {
+        if(index > 0 && index < args.length) {
+            return args[index];
+        }
+        throw new IndexOutOfBoundsException("Missing argument for option " + args[index]);
     }
     
 }

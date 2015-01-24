@@ -121,6 +121,14 @@ public class Environment {
         return this;
     }
 
+    public Args getArgs() {
+        return args;
+    }
+
+    public Config getConfig() {
+        return config;
+    }
+    
     public List<String> getSourcePaths() {
         return sourcePaths;
     }

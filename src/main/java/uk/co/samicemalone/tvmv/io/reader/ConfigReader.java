@@ -45,17 +45,23 @@ import uk.co.samicemalone.tvmv.model.Config;
 public class ConfigReader extends KeyValueReader {
     
     /**
-     * Read the config file from the current directory. If the file doesn't exist,
-     * the default location will be used ({@link OS#getDefaultConfigDirectory()}).
+     * Read the config file from the specified file path. If this is set to
+     * null, the config file will be read from the current directory.
+     * If this file doesn't exist, the default location will be used ({@link OS#getDefaultConfigDirectory()}).
      * If this file doesn't exist, a FileNotFoundException is thrown
-     * @return Path to config file
+     * @param filePath Config file path or null
+     * @return Config
      * @throws FileNotFoundException if the config cannot be found
      * @throws OSNotSupportedException if the OS is not supported
      * @throws IOException if unable to read the config file
      */
-    public static Config read() throws IOException {
+    public static Config read(String filePath) throws IOException {
         ConfigReader r = new ConfigReader();
-        r.readFile(getConfigFilePath());
+        Path p = filePath == null ? getConfigFilePath() : Paths.get(filePath);
+        if(filePath != null && !Files.exists(p)) {
+            throw new FileNotFoundException("Config file not found: " + filePath);
+        }
+        r.readFile(p);
         return r.getConfig();
     }
     
