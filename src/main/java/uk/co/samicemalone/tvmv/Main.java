@@ -61,7 +61,7 @@ public class Main {
     public static void main(String[] args) {
         try {
             Args arguments = Args.parse(args);
-            if(arguments == null) {
+            if(arguments.isHelpSet()) {
                 printHelp();
                 System.exit(0);
             }

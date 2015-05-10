@@ -41,6 +41,7 @@ import uk.co.samicemalone.tvmv.io.MoveOperation;
 public class Args {
     
     private boolean isNativeIO = false;
+    private boolean isHelp = false;
     private boolean isReplace = false;
     private boolean isSkipNotMatched = false;
     private String configFile;
@@ -111,6 +112,10 @@ public class Args {
     public void addInputFile(String inputFile) {
         inputFiles.add(inputFile);
     }
+    
+    public boolean isHelpSet() {
+        return isHelp;
+    }
 
     /**
      * Parses the argument string array into an Args object
@@ -147,6 +152,7 @@ public class Args {
                 return true;
             case "-h":
             case "--help":
+                returnArgs.isHelp = true;
                 return false;
             case "-n":
             case "--native":
