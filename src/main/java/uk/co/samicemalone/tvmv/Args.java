@@ -44,6 +44,7 @@ public class Args {
     private boolean isHelp = false;
     private boolean isReplace = false;
     private boolean isSkipNotMatched = false;
+    private String showOverride;
     private String configFile;
     private IOOperation ioOperation = new MoveOperation();
     private final List<String> inputFiles;
@@ -117,6 +118,10 @@ public class Args {
         return isHelp;
     }
 
+    public String getShowOverride() {
+        return showOverride;
+    }
+
     /**
      * Parses the argument string array into an Args object
      * @param args Command Line Arguments
@@ -154,6 +159,10 @@ public class Args {
             case "--help":
                 returnArgs.isHelp = true;
                 return false;
+            case "-o":
+            case "--override-show":
+                returnArgs.showOverride = getArgument(args, index+1);
+                return true;
             case "-n":
             case "--native":
                 returnArgs.isNativeIO = true;

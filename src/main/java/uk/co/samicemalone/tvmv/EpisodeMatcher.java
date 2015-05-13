@@ -40,6 +40,7 @@ import uk.co.samicemalone.libtv.VideoFilter;
 import uk.co.samicemalone.libtv.exception.MatchException;
 import uk.co.samicemalone.libtv.matcher.TVMatcher;
 import uk.co.samicemalone.libtv.model.EpisodeMatch;
+import uk.co.samicemalone.libtv.matcher.TVMatcher.MatchElement;
 
 /**
  *
@@ -48,6 +49,18 @@ import uk.co.samicemalone.libtv.model.EpisodeMatch;
 public class EpisodeMatcher {
     
     private final boolean isSkipNotMatched;
+    private final String tvShow;
+    
+    /**
+     * Create a new instance of episode matcher
+     * @param tvShow TV show
+     * @param isSkipNotMatched if true, files that cannot be matched will be
+     * skipped. if false, an exception will be thrown when unable to match 
+     */
+    public EpisodeMatcher(String tvShow, boolean isSkipNotMatched) {
+        this.tvShow = tvShow;
+        this.isSkipNotMatched = isSkipNotMatched;
+    }
     
     /**
      * Create a new instance of episode matcher
@@ -55,7 +68,17 @@ public class EpisodeMatcher {
      * skipped. if false, an exception will be thrown when unable to match 
      */
     public EpisodeMatcher(boolean isSkipNotMatched) {
+        this.tvShow = null;
         this.isSkipNotMatched = isSkipNotMatched;
+    }
+    
+    /**
+     * Create a new instance of episode matcher for a given show
+     * @param tvShow TV show
+     */
+    public EpisodeMatcher(String tvShow) {
+        this.tvShow = tvShow;
+        this.isSkipNotMatched = false;
     }
     
     /**
@@ -83,14 +106,21 @@ public class EpisodeMatcher {
     }
     
     private EpisodeMatch matchEpisode(TVMatcher tvMatcher, Path path) throws MatchException {
+        MatchElement me = tvShow == null ? MatchElement.ALL : MatchElement.SEASON;
         if(isSkipNotMatched) {
-            EpisodeMatch e = tvMatcher.matchElement(path, TVMatcher.MatchElement.ALL);
+            EpisodeMatch e = tvMatcher.matchElement(path, me);
             if(e == null) {
                 Display.onSkipNotMatched(path);
+            } else if(tvShow != null) {
+                e.setShow(tvShow);
             }
             return e;
         } else {
-            return tvMatcher.matchOrThrow(path, TVMatcher.MatchElement.ALL);
+            EpisodeMatch e = tvMatcher.matchOrThrow(path, me);
+            if(tvShow != null) {
+                e.setShow(tvShow);
+            }
+            return e;
         }
     }
     

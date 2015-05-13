@@ -82,7 +82,7 @@ public class Main {
     private static void run(Environment env) throws IOException, IllegalStateException, OSNotSupportedException, MatchException{
         AliasMap aliasMap = AliasReader.read(new AliasMap());
         AliasedTVLibrary library = new AliasedTVLibrary(env.getTvDestinationPaths(), aliasMap);
-        EpisodeMatcher matcher = new EpisodeMatcher(env.getArgs().isSkipNotMatchedSet());
+        EpisodeMatcher matcher = new EpisodeMatcher(env.getArgs().getShowOverride(), env.getArgs().isSkipNotMatchedSet());
         EpisodeIO episodeIO = new EpisodeIO(library, env.getArgs().isNativeIOSet());
         if(env.getCreateShowsFile() != null && env.getCreateDestShowsDir() != null) {
             for(String showName : StringListReader.read(Paths.get(env.getCreateShowsFile()))) {
@@ -120,16 +120,17 @@ public class Main {
         System.out.println("because episode 2 would be removed. For this replacement to succeed,");
         System.out.println("\"24 - s01e02\" must also exist as an input episode file.");
         System.out.println();
-        System.out.println("   --config FILE           Use this specific tvmv.conf file");
-        System.out.println("   -c, --copy              Copy the input FILEs instead of moving them");
-        System.out.println("   -h, --help              Prints this message");
-        System.out.println("   -n, --native            Use Java NIO API's for IO operations instead of");
-        System.out.println("                           Java IO Streams. Native IO will not display a ");
-        System.out.println("                           progress bar, but will avoid a copy and delete");
-        System.out.println("                           from the same filesystem if moving");
-        System.out.println("   -r, --replace           Replaces existing episodes");
-        System.out.println("   -s, --skip-not-matched  Skip input files that cannot be matched instead");
-        System.out.println("                           of exiting");
+        System.out.println("   --config FILE             Use this specific tvmv.conf file");
+        System.out.println("   -c, --copy                Copy the input FILEs instead of moving them");
+        System.out.println("   -h, --help                Prints this message");
+        System.out.println("   -n, --native              Use Java NIO API's for IO operations instead of");
+        System.out.println("                             Java IO Streams. Native IO will not display a ");
+        System.out.println("                             progress bar, but will avoid a copy and delete");
+        System.out.println("                             from the same filesystem if moving");
+        System.out.println("   -o, --override-show SHOW  Dont detect show, use the value given");
+        System.out.println("   -r, --replace             Replaces existing episodes");
+        System.out.println("   -s, --skip-not-matched    Skip input files that cannot be matched instead");
+        System.out.println("                             of exiting");
         System.out.println();
         System.out.println("TV show aliases can be defined in aliases.txt");
     }
