@@ -48,7 +48,7 @@ public class OS {
 
     public static File getDefaultConfigDirectory() {
         if(isWindows) {
-            return new File("C:\\ProgramData\\" + System.getProperty("user.name"), "tvmv/");
+            return new File(System.getProperty("user.name"), "tvmv/");
         } else if(isUnix || isMac) {
             return new File(System.getProperty("user.home") + "/.config/", "tvmv/");
         }

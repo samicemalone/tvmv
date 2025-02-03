@@ -35,7 +35,7 @@ following directory will be checked on your operating system:
 
         Mac default:     $HOME/.config/tvmv/
        UNIX default:     $HOME/.config/tvmv/
-    Windows default:     C:\ProgramData\$USER\tvmv\
+    Windows default:     %USERPROFILE%\tvmv\
 
 See sample.tvmv.conf for more information.
 

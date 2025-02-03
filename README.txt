@@ -107,7 +107,7 @@ FILES
       The current directory is first checked for tvmv.conf, and if not found,
       the following directories are checked:
 
-      Windows C:\ProgramData\$USER\tvmv\
+      Windows %USERPROFILE%\tvmv\
       Linux ~/.config/tvmv/
       Mac /Users/.config/tvmv/
 
