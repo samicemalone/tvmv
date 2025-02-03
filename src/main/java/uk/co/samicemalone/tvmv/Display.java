@@ -103,12 +103,12 @@ public class Display {
         format.append(StringUtils.leftPad(percent, 3)).append('%');
         Ansi ansi = Ansi.ansi();
         if(OS.isWindows && !System.getProperty("java.io.tmpdir").toLowerCase().contains("cygwin")) {
-            ansi.saveCursorPosition().eraseLine().render(format.toString()).restorCursorPosition();
+            ansi.saveCursorPosition().eraseLine().render(format.toString()).restoreCursorPosition();
         } else {
             System.out.print('\r');
             ansi.render(format.toString());
         }
-        AnsiConsole.out.print(ansi);
+        AnsiConsole.out().print(ansi);
     }
 
     public static void onIORollback(IOOperation io) {

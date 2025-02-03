@@ -69,10 +69,10 @@ public class Main {
             Environment env = new Environment(arguments, config).initialise();
             run(env);
         } catch(Exception e) {
-            AnsiConsole.err.println(Ansi.ansi().render(e.getMessage()));
+            AnsiConsole.err().println(Ansi.ansi().render(e.getMessage()));
             Throwable t = e.getCause();
             if(t != null) {
-                AnsiConsole.err.print(Ansi.ansi().render(" @|yellow Cause|@: "));
+                AnsiConsole.err().print(Ansi.ansi().render(" @|yellow Cause|@: "));
                 System.err.println(t.getMessage());
             }
             System.exit(1);

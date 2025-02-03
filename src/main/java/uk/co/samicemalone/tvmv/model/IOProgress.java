@@ -31,6 +31,8 @@ package uk.co.samicemalone.tvmv.model;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 import uk.co.samicemalone.tvmv.Display;
 
 /**
@@ -40,7 +42,7 @@ import uk.co.samicemalone.tvmv.Display;
 public class IOProgress {
     
     public static long getBytesPerChar(long size) {
-        return new BigDecimal(size).divide(new BigDecimal(Display.PROGRESS_WIDTH), 3, BigDecimal.ROUND_FLOOR).longValue();
+        return new BigDecimal(size).divide(new BigDecimal(Display.PROGRESS_WIDTH), 3, RoundingMode.FLOOR).longValue();
     }
 
     private final long bytesWritten;
@@ -74,7 +76,7 @@ public class IOProgress {
         if(size == 0) {
             return BigDecimal.ZERO;
         }
-        return new BigDecimal(bytesWritten).divide(new BigDecimal(size), 3, BigDecimal.ROUND_FLOOR);
+        return new BigDecimal(bytesWritten).divide(new BigDecimal(size), 3, RoundingMode.FLOOR);
     }
 
     public int getPercent() {

@@ -21,7 +21,7 @@
  * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
@@ -49,21 +49,21 @@ import uk.co.samicemalone.tvmv.io.WindowsLibraryParser;
  * @author Sam Malone
  */
 public class Environment {
-    
+
     private final Args args;
     private final Config config;
     private final List<String> sourcePaths;
     private final List<String> tvDestinationPaths;
-    
+
     private String createShowsFile;
     private String createDestShowsDir;
-    
+
     /**
      * Create a new Environment instance.
      * The Environment is used to store the program input data parsed from
      * the arguments and config file.
      * @param args program arguments
-     * @param config program config 
+     * @param config program config
      */
     public Environment(Args args, Config config) {
         this.args = args;
@@ -71,7 +71,7 @@ public class Environment {
         sourcePaths = new ArrayList<>();
         tvDestinationPaths = new ArrayList<>();
     }
-    
+
     /**
      * Initialise the environment. The arguments and config file will be validated
      * @return same instance
@@ -128,7 +128,7 @@ public class Environment {
     public Config getConfig() {
         return config;
     }
-    
+
     public List<String> getSourcePaths() {
         return sourcePaths;
     }
@@ -144,13 +144,13 @@ public class Environment {
     public String getCreateDestShowsDir() {
         return createDestShowsDir;
     }
-    
+
     private void addDestPathIfExists(Path p) {
         if(Files.exists(p)) {
             tvDestinationPaths.add(p.toString());
         }
     }
-    
+
     private Path validatePath(VideoFilter filter, String path) throws IOException {
         Path p = Paths.get(toFormattedPath(path));
         if(!Files.exists(p)) {
@@ -161,9 +161,14 @@ public class Environment {
         }
         return p;
     }
-    
+
     private String toFormattedPath(String path) {
-        return OS.isCygwinPath(path) ? OS.toWindowsPath(path) : path;
+        if(OS.isCygwinPath(path)) {
+            return new StringBuilder().append(path.charAt(10)).append(":\\").append(path.substring(12)).toString();
+        } else if(OS.isWSLPath(path)) {
+            return new StringBuilder().append(path.charAt(5)).append(":\\").append(path.substring(7)).toString();
+        }
+        return path;
     }
-    
+
 }
