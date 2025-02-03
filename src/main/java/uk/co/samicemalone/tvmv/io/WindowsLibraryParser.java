@@ -86,7 +86,7 @@ public class WindowsLibraryParser extends DefaultHandler {
      * @return true if os supported, false otherwise
      */
     public static boolean isOSSupported() {
-        return OS.OS.startsWith("windows 7") || OS.OS.startsWith("windows 8");
+        return OS.OS.startsWith("windows 7") || OS.OS.startsWith("windows 8") || OS.OS.startsWith("windows 10");
     }
     
     /**
