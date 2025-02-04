@@ -109,7 +109,7 @@ public class Environment {
             addDestPathIfExists(Paths.get(path));
         }
         if(tvDestinationPaths.isEmpty()) {
-            throw new FileNotFoundException("No TV destination paths found.\nEnsure the DESTINATION (or DESTINATION_LIBRARY in Windows 7/8) is set in tvmv.conf");
+            throw new FileNotFoundException("No TV destination paths found.\nEnsure the DESTINATION (or DESTINATION_LIBRARY in Windows 7+) is set in tvmv.conf");
         }
         if(!StringUtils.isEmpty(config.getCreateShowsFile()) && Files.exists(Paths.get(config.getCreateShowsFile()))) {
             createShowsFile = config.getCreateShowsFile();

@@ -23,7 +23,7 @@ DESCRIPTION
    The TV folder destinations that episodes will be moved/copied to, are set
    via the tvmv.conf file. You can set multiple TV destinations for the case
    when your TV collection is not located in the same directory/filesystem.
-   Windows Libraries can also be used as the destination if Windows 7/8.
+   Windows Libraries can also be used as the destination if Windows 7+.
    
    Some TV shows may be released with aliases (e.g. CSI NY = CSI New York). To
    ensure aliased episodes are moved/copied to the right place, aliases can be
@@ -92,7 +92,7 @@ FILES
       tvmv.conf (REQUIRED)
          This file stores the configuration data for tvmv. This is where you
          define the TV destination files, and an optional episodes source
-         directory. Windows 7/8 users can also define a destination library.
+         directory. Windows 7+ users can also define a destination library.
          See sample.tvmv.conf for more information.
       aliases.txt
          This file stores TV show aliases that are mapped to a TV show
